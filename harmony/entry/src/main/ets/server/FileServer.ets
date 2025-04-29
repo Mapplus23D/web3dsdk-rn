@@ -26,6 +26,14 @@ export default function startFileServer(context: common.UIAbilityContext) {
     //   });
     // })
 
+    .get('/webapp/.*', (req: IncomingMessage, res: ServerResponse) => {
+      file.serveFile(
+        req.path, 200, {}, req, res
+      ).on("error", (err: Error) => {
+        res.writeHead(404, { 'Content-Type': 'text/html' })
+        res.end('not found')
+      });
+    })
     .get('/file', (req: IncomingMessage, res: ServerResponse) => {
       file.serveFile(
         '/build/logo192.png', 200, {}, req, res

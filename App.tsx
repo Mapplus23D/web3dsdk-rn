@@ -17,6 +17,8 @@ import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
 import WebView from 'react-native-webview';
+import { useMemo, useRef } from 'react';
+import createSuperMap3D from './client/react-native';
 
 
 
@@ -26,6 +28,16 @@ function App(): JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  const webViewRef = useRef<WebView>(null)
+
+  const client = useMemo(() => {
+    const client = createSuperMap3D(() => {
+      return webViewRef.current
+    })
+    return client
+  }, [])
+
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -40,12 +52,19 @@ function App(): JSX.Element {
           // backgroundColor: 'red',
         }}>
         <WebView
-        //  source={{uri: 'http://172.16.15.237:3100'}}
-         source={{uri: 'file:///data/storage/el2/base/haps/entry/files/build/index.html'}}
-        // chrome debug：
-        // hdc shell
-        // cat /proc/net/unix | grep devtools
-        // hdc fport tcp:9222 localabstract:webview_devtools_remote_22341
+          ref={webViewRef}
+          onMessage={e => {
+            client.handleMessage(e.nativeEvent.data)
+          }}
+          onLoadEnd={() => {
+            client.init()
+          }}
+          source={{ uri: 'http://localhost:9999/webapp/index.html' }}
+          //  source={{uri: 'file:///data/storage/el2/base/haps/entry/files/web3dsdk-web/index.html'}}
+          // chrome debug：
+          // hdc shell
+          // cat /proc/net/unix | grep devtools
+          // hdc fport tcp:9222 localabstract:webview_devtools_remote_22341
           webviewDebuggingEnabled={true}
         />
       </View>
