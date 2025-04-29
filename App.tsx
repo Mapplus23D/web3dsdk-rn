@@ -59,8 +59,7 @@ function App(): JSX.Element {
           onLoadEnd={() => {
             client.init()
           }}
-          source={{ uri: 'http://localhost:9999/webapp/index.html' }}
-          //  source={{uri: 'file:///data/storage/el2/base/haps/entry/files/web3dsdk-web/index.html'}}
+          source={{ uri: 'http://localhost:9999/webapp3d/index.html' }}
           // chrome debug：
           // hdc shell
           // cat /proc/net/unix | grep devtools

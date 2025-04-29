@@ -26,7 +26,7 @@ export default function startFileServer(context: common.UIAbilityContext) {
     //   });
     // })
 
-    .get('/webapp/.*', (req: IncomingMessage, res: ServerResponse) => {
+    .get('/webapp3d/.*', (req: IncomingMessage, res: ServerResponse) => {
       file.serveFile(
         req.path, 200, {}, req, res
       ).on("error", (err: Error) => {
