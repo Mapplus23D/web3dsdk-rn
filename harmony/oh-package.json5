@@ -2,8 +2,8 @@
   "modelVersion": "5.0.3",
   "description": "Please describe the basic information.",
   "overrides": {
-    //    "@rnoh/react-native-openharmony": "^0.72.53",
-    "@rnoh/react-native-openharmony": "file:./libs/react_native_openharmony-0.72.59.har"
+    "@rnoh/react-native-openharmony": "0.72.67",
+//    "@rnoh/react-native-openharmony": "file:./libs/react_native_openharmony-0.72.59.har"
   },
   "dependencies": {
     "@ohos/polka": "^1.0.1"
