@@ -9,6 +9,7 @@
     "@rnoh/react-native-openharmony": "0.72.67",
 //    "@rnoh/react-native-openharmony": "file:../libs/react_native_openharmony-0.72.59.har",
     "@react-native-oh-tpl/react-native-webview": "file:../../node_modules/@react-native-oh-tpl/react-native-webview/harmony/rn_webview.har",
+    "@react-native-oh-tpl/react-native-safe-area-context": "file:../../node_modules/@react-native-oh-tpl/react-native-safe-area-context/harmony/safe_area.har",
   },
   "devDependencies": {},
   "dynamicDependencies": {}

@@ -12,6 +12,7 @@ add_compile_definitions(WITH_HITRACE_SYSTRACE)
 set(WITH_HITRACE_SYSTRACE 1) # for other CMakeLists.txt files to use
 
 add_subdirectory("${RNOH_CPP_DIR}" ./rn)
+add_subdirectory("${OH_MODULE_DIR}/@react-native-oh-tpl/react-native-safe-area-context/src/main/cpp" ./safe-area)
 
 file(GLOB GENERATED_CPP_FILES "./generated/*.cpp")
 
@@ -22,3 +23,4 @@ add_library(rnoh_app SHARED
 )
 
 target_link_libraries(rnoh_app PUBLIC rnoh)
+target_link_libraries(rnoh_app PUBLIC rnoh_safe_area)
