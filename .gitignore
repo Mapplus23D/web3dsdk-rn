@@ -64,3 +64,4 @@ yarn-error.log
 
 # testing
 /coverage
+harmony/entry/src/main/cpp/generated/*
