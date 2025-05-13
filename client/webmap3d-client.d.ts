@@ -4461,18 +4461,16 @@ export type IScanEffect = {
 	/** 重置扫描线参数 */
 	reset: () => Promise<void>;
 };
-export type ITileCache = {
-	/**
-	 * 连接到本地缓存服务器
-	 * @param wsPort websocket端口
-	 * @param httpPort http端口
-	 */
-	connectToServer(wsPort: number, httpPort: number): void;
-	/**
-	 * 断开本地缓存服务器
-	 */
-	disconnectFromServer(): void;
-};
+/** 发送消息实现接口 */
+export type MessagerSendHandler = (event: string) => void;
+export interface MessagerHandlers {
+	sendHandler: MessagerSendHandler;
+	handleLargeMessage?: (str: string, limit: number) => {
+		isLarge: boolean;
+		message: string;
+	};
+	decodeLargeMessage?: (base64: string) => string;
+}
 /**
  * 场景
  */
@@ -4674,25 +4672,30 @@ export type ITrackingLayer = {
 	editEnd: () => Vector3[] | Circle | Rectangle | Spline;
 	translateEntity: (entityId: string, from: Vector2, to: Vector2) => Promise<boolean>;
 };
-/** 发送消息实现接口 */
-export type MessagerSendHandler = (event: string) => void;
-export interface MessagerHandlers {
-	sendHandler: MessagerSendHandler;
-	handleLargeMessage?: (str: string, limit: number) => {
-		isLarge: boolean;
-		message: string;
-	};
-	decodeLargeMessage?: (base64: string) => string;
-}
+export type ITileCache = {
+	/**
+	 * 连接到本地缓存服务器
+	 * @param wsPort websocket端口
+	 * @param httpPort http端口
+	 */
+	connectToServer(wsPort: number, httpPort: number): void;
+	/**
+	 * 断开本地缓存服务器
+	 */
+	disconnectFromServer(): void;
+};
 export interface ServerOption {
 	/**
 	 * 是否开启右上角导航
 	 */
 	navigation: boolean;
 }
+export interface ClientOption {
+	clientPort?: number;
+}
 export declare function createClient(handlers: MessagerHandlers): Client;
 export type Client = typeof enums & {
-	init: (container?: string, option?: Partial<ServerOption>) => Promise<void>;
+	init: (container?: string, option?: Partial<ServerOption> & Partial<ClientOption>) => Promise<void>;
 	handleMessage: (messageStr: string) => void;
 	destroy: () => Promise<void>;
 	addListener: <key extends keyof SuperMap3DEvent>(event: key, listener: (param: SuperMap3DEvent[key]) => void) => void;

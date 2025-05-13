@@ -1,8 +1,9 @@
-import {Button, Text, View} from 'react-native';
+import {Button, View} from 'react-native';
 import Webmap3DView from '../components/Webmap3DView';
 import {DemoStackPageProps} from 'src/navigators/types';
 import {useEffect, useRef, useState} from 'react';
 import {Client, IMap3D} from 'client/webmap3d-client';
+import { RTNWebMap3D } from '../specs';
 
 interface Props extends DemoStackPageProps<'SceneGeneral'> {}
 
@@ -13,6 +14,17 @@ export default function SceneGeneral(props: Props) {
   const [reginoId, setRegionId] = useState<string | undefined>();
 
   const saveMapRef = useRef<IMap3D | undefined>()
+
+  const [clientUrl, setClientUrl] = useState<string | undefined>()
+
+  useEffect(() => {
+    // 获取 sdk web 服务地址
+    RTNWebMap3D?.getClientUrl().then(res => {
+      if(res) {
+        setClientUrl(res)
+      }
+    })
+  }, [])
 
   useEffect(() => {
     init();
@@ -400,9 +412,12 @@ export default function SceneGeneral(props: Props) {
     }
   }
 
+  if(!clientUrl) return 
+
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Webmap3DView
+        clientUrl={clientUrl}
         onInited={client => {
           console.log('inited');
           setClient(client);

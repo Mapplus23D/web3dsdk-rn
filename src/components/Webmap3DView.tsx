@@ -5,6 +5,7 @@ import { View } from "react-native"
 import WebView from "react-native-webview"
 
 interface Props {
+  clientUrl: string
   onInited: (client: Client) => void
 }
 
@@ -36,17 +37,12 @@ export default function Webmap3DView(props: Props) {
       onLoadEnd={() => {
         // 加载完成后，初始化 client 对象，与 webview 中的 webmap3d sdk 建立联系
         // 初始化完成后才可以调用 sdk 中的各个方法
-        client.init().then(() => {
+        client.init(undefined, {clientPort: 9999}).then(() => {
           props.onInited(client)
         })
       }}
       // 本地的web服务地址，包含实际的 sdk 代码引用
-      source={{ uri: 'http://localhost:9999/webapp3d/index.html' }}
-      // chrome debug：
-      // hdc shell
-      // cat /proc/net/unix | grep devtools
-      // hdc fport tcp:9222 localabstract:webview_devtools_remote_22341
-      webviewDebuggingEnabled={true}
+      source={{ uri: props.clientUrl }}
     />
   </View>
   )

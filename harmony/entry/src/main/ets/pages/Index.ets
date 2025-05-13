@@ -1,7 +1,6 @@
 import {
   AnyJSBundleProvider,
   ComponentBuilderContext,
-  FileJSBundleProvider,
   MetroJSBundleProvider,
   ResourceJSBundleProvider,
   RNApp,
@@ -12,15 +11,6 @@ import {
 } from '@rnoh/react-native-openharmony';
 import { createRNPackages } from '../RNPackagesFactory';
 import { WebView, WEB_VIEW } from "@react-native-oh-tpl/react-native-webview"
-import common from '@ohos.app.ability.common';
-import { fileIo } from '@kit.CoreFileKit';
-import { BusinessError } from '@kit.BasicServicesKit';
-import zlib from '@ohos.zlib'
-import webview from '@ohos.web.webview';
-import startFileServer from '../server/FileServer';
-import fs from '@ohos.file.fs';
-
-// import { webview } from '@kit.ArkWeb';
 
 @Builder
 export function buildCustomRNComponent(ctx: ComponentBuilderContext) {
@@ -44,22 +34,6 @@ struct Index {
 
   aboutToAppear() {
     if(!this.rnohCoreContext) return;
-    // webview.WebviewController.setWebDebuggingAccess(true);
-    ;(async () => {
-      try {
-        console.log('zxt','about to read')
-        const res = await this.rnohCoreContext!.uiAbilityContext.resourceManager.getRawFileList('')
-        console.log('zxt', 'res', JSON.stringify(res))
-        res.forEach((file => {
-          if(file.endsWith('.zip')) {
-            copyRawFileToFiles(this.rnohCoreContext!.uiAbilityContext, file)
-          }
-        }))
-      } catch (e) {
-        console.log('zxt', 'error', JSON.stringify(e))
-      }
-    })()
-    startFileServer(this.rnohCoreContext!.uiAbilityContext)
 
     this.logger = this.rnohCoreContext!.logger.clone("Index")
     const stopTracing = this.logger.clone("aboutToAppear").startTracing();
@@ -115,35 +89,4 @@ struct Index {
     .height('100%')
     .width('100%')
   }
-}
-
-async function copyRawFileToFiles(context: common.Context, rowFilePath: string) {
-  let destRoot = context.filesDir;
-  let srcFileName = rowFilePath // rawFile下的文件名
-  let destFilePath = destRoot + "/" + srcFileName;
-  console.log("copyRawFileToSdcard filepath : " + destFilePath)
-  // 创建文件目录
-    // 创建目录成功
-    // console.log("copyRawFileToSdcard mkdir success ")
-    // context.resourceManager.isRawDir()
-    context.resourceManager.getRawFileContent(srcFileName, async (error: BusinessError, value: Uint8Array) => {
-      if (error != null) {
-        console.error("error is " + error);
-      } else {
-        let rawFile = value;
-        let fileStream = fileIo.createStreamSync(destFilePath, "w+");
-        fileStream.writeSync(rawFile.buffer);
-        fileStream.close();
-        // 文件拷贝成功
-        console.log("copyRawFileToSdcard write success")
-
-        try {
-          console.log('zxt', 'decompressFile',destFilePath, destRoot)
-          await zlib.decompressFile(destFilePath, destRoot)
-          fileIo.unlink(destFilePath)
-        } catch (e) {
-          console.log('zxt', 'error',e)
-        }
-      }
-    });
 }
