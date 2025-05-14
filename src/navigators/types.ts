@@ -1,10 +1,13 @@
 import { RouteProp } from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 export type DemoStackParamList = {
   DemoHome: undefined;
 
-  SceneGeneral: undefined;
+  DrawObject: undefined;
+  DemoList: undefined;
+  BaseMap: undefined;
+  MapStyle: undefined;
 };
 
 export type DemoStackNavigationProps<

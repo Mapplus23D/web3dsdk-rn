@@ -1,11 +1,11 @@
-import {Button, View} from 'react-native';
-import Webmap3DView from '../components/Webmap3DView';
-import {DemoStackPageProps} from 'src/navigators/types';
-import {useEffect, useRef, useState} from 'react';
-import {Client, IMap3D} from 'client/webmap3d-client';
-import { RTNWebMap3D } from '../specs';
+import { Client, IMap3D } from 'client/webmap3d-client';
+import { useEffect, useRef, useState } from 'react';
+import { Button, View } from 'react-native';
+import { DemoStackPageProps } from 'src/navigators/types';
+import Webmap3DView from '../../components/Webmap3DView';
+import { RTNWebMap3D } from '../../specs';
 
-interface Props extends DemoStackPageProps<'SceneGeneral'> {}
+interface Props extends DemoStackPageProps<'DrawObject'> { }
 
 export default function SceneGeneral(props: Props) {
   const [client, setClient] = useState<Client | undefined>();
@@ -20,7 +20,7 @@ export default function SceneGeneral(props: Props) {
   useEffect(() => {
     // 获取 sdk web 服务地址
     RTNWebMap3D?.getClientUrl().then(res => {
-      if(res) {
+      if (res) {
         setClientUrl(res)
       }
     })
@@ -387,7 +387,7 @@ export default function SceneGeneral(props: Props) {
         // 材质修改为网格
         fillType: client.FillType.gridding,
         // 设置网格材质颜色
-        material: {color: 'pink'},
+        material: { color: 'pink' },
       },
     });
   }
@@ -407,26 +407,27 @@ export default function SceneGeneral(props: Props) {
    * 打开保存下来的地图
    */
   function restoreMap() {
-    if(client && saveMapRef.current) {
+    if (client && saveMapRef.current) {
       client.scene.open(saveMapRef.current)
     }
   }
 
-  if(!clientUrl) return 
+  if (!clientUrl) return
 
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Webmap3DView
         clientUrl={clientUrl}
         onInited={client => {
           console.log('inited');
           setClient(client);
         }}
+        navigation={props.navigation}
       />
       <View
         style={{
           position: 'absolute',
-          top: 0,
+          top: 60,
           bottom: 0,
           left: 0,
           right: 0,
@@ -439,32 +440,32 @@ export default function SceneGeneral(props: Props) {
             style={{
               width: '30%',
             }}>
-            <View style={{marginTop: 20}}>
+            <View style={{ marginTop: 20 }}>
               <Button
                 title={pointId === undefined ? ' 添加点' : '修改点'}
                 onPress={pointId === undefined ? addPoint : modifyPoint}
               />
             </View>
-            <View style={{marginTop: 20}}>
+            <View style={{ marginTop: 20 }}>
               <Button
                 title={lineId === undefined ? ' 添加线' : '修改线'}
                 onPress={lineId === undefined ? addLine : modifyLine}
               />
             </View>
-            <View style={{marginTop: 20}}>
+            <View style={{ marginTop: 20 }}>
               <Button
                 title={reginoId === undefined ? ' 添加面' : '修改面'}
                 onPress={reginoId === undefined ? addRegion : modifyRegion}
               />
             </View>
-            <View style={{marginTop: 20}}>
+            <View style={{ marginTop: 20 }}>
               <Button title={'保存地图'} onPress={getMap} />
             </View>
-            <View style={{marginTop: 20}}>
+            <View style={{ marginTop: 20 }}>
               <Button title={'打开保存地图'} onPress={restoreMap} />
             </View>
           </View>
-          
+
         )}
       </View>
     </View>

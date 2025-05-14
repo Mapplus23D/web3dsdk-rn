@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Button, Text, View } from "react-native";
 import { DemoStackPageProps } from "src/navigators/types";
-import { RTNWebMap3D } from "../specs";
 import { ILicenseInfo } from "src/specs/v1/NativeWebMap3D";
+import { RTNWebMap3D } from "../specs";
 
 interface Props extends DemoStackPageProps<'DemoHome'> {
 
@@ -74,7 +74,7 @@ export default function Home({ navigation }: Props) {
         <Button title="激活" onPress={activate} />
       </View>
       <View style={{ marginTop: 20 }}>
-        <Button title="地图操作示例" onPress={() => navigation.navigate('SceneGeneral')} />
+        <Button title="地图操作示例" onPress={() => navigation.navigate('DemoList')} />
       </View>
     </View>
   )
