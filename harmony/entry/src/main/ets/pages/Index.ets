@@ -59,6 +59,7 @@ struct Index {
         RNApp({
           rnInstanceConfig: {
             createRNPackages,
+            enableDebugger: true,
             enableNDKTextMeasuring: true, // 该项必须为true，用于开启NDK文本测算
             enableBackgroundExecutor: false,
             enableCAPIArchitecture: true, // 该项必须为true，用于开启CAPI
