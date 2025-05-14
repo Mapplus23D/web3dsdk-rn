@@ -1,5 +1,5 @@
 import { Client, IMap3D } from 'client/webmap3d-client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, View } from 'react-native';
 import { DemoStackPageProps } from 'src/navigators/types';
 import Webmap3DView from '../../components/Webmap3DView';
@@ -17,13 +17,17 @@ export default function SceneGeneral(props: Props) {
 
   const [clientUrl, setClientUrl] = useState<string | undefined>()
 
+  const resourceBase = useMemo(() => {
+    const base = RTNWebMap3D?.getResourceBase()
+    return base || ''
+  }, [])
+
   useEffect(() => {
     // 获取 sdk web 服务地址
-    RTNWebMap3D?.getClientUrl().then(res => {
-      if (res) {
-        setClientUrl(res)
-      }
-    })
+    const res = RTNWebMap3D?.getClientUrl()
+    if (res) {
+      setClientUrl(res)
+    }
   }, [])
 
   useEffect(() => {
@@ -50,6 +54,9 @@ export default function SceneGeneral(props: Props) {
     // 对于静态地图建议开启主动刷新，大幅降低设备发热和电量消耗
     // 开启后，动态效果在不刷新的时候会完全静止
     client.scene.setRequestRenderMode(true);
+
+    // 若需要使用资源包中的资源，则需要设置资源路径
+    client.scene.setResourceBase(resourceBase)
 
     //对于地图初始化可以通过 `client.scene.open` 直接打开配置好的地图参数进行
     //或者手动调用相关方法进行
@@ -263,6 +270,19 @@ export default function SceneGeneral(props: Props) {
         size: 20,
         heightReference: client.HeightReference.RELATIVE_TO_GROUND,
       },
+    });
+
+    // 若添加了资源包，可在这里使用资源中的图片添加一个billboard
+    await client.scene.addEntity('point', {
+      //点位置
+      position: {
+        x: 102,  // 经度
+        y: 30,   // 纬度
+        z: 1000, // 高度
+      },
+      billboard: {
+        image: `${resourceBase}/resource/symbol/image/ATM.png`,
+      }
     });
 
     // 记录添加的对象的id及更新页面状态

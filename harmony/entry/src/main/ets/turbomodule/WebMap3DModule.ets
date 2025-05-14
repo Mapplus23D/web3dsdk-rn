@@ -4,17 +4,20 @@ import { WebMap3D } from 'webmap3d/Index';
 
 export class WebMap3DModule extends TurboModule implements TM.RTNWebMap3D.Spec {
 
-  initEnvironment(clientPort: number): Promise<void> {
-    return new Promise(resolve => {
-      WebMap3D.initEnvironment(this.ctx.uiAbilityContext, clientPort)
-      resolve(undefined)
-    })
+  initEnvironment(clientPort: number): void {
+    WebMap3D.initEnvironment(this.ctx.uiAbilityContext, clientPort)
   }
 
-  getClientUrl(): Promise<string> {
-    return new Promise(resolve => {
-      resolve(WebMap3D.getClientUrl())
-    })
+  getServiceBase(): string {
+    return WebMap3D.getServiceBase()
+  }
+
+  getResourceBase(): string {
+    return WebMap3D.getResourceBase()
+  }
+
+  getClientUrl(): string {
+    return WebMap3D.getClientUrl()
   }
 
   activate(serialNo: string): Promise<boolean> {

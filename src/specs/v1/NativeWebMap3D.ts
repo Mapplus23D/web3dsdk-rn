@@ -12,13 +12,23 @@ export interface Spec extends TurboModule {
    * 初始化环境
    * @param clientPort client服务运行端口
    */
-  initEnvironment(clientPort?: number): Promise<void>
+  initEnvironment(clientPort?: number): void
 
+  /**
+   * 获取 client 服务地址
+   */
+  getServiceBase(): string
+  
+  /**
+   * 获取资源地址
+   */
+  getResourceBase(): string
+  
   /**
    * 获取 client web 服务地址
    */
-  getClientUrl(): Promise<string>
-  
+  getClientUrl(): string
+
   /**
    * 通过序列号激活
    * @param serialNo 序列号 

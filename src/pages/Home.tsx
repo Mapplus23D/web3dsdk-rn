@@ -13,16 +13,15 @@ export default function Home({ navigation }: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
 
   useEffect(() => {
-    init().then(() => {
-      getLicense()
-    })
+    init()
+    getLicense()
   }, [])
 
 
   /** 原生端进行初始化 */
-  async function init() {
+  function init() {
     // 原生端通过指定端口号启动服务，并复制需要使用的资源
-    await RTNWebMap3D?.initEnvironment(9999)
+    RTNWebMap3D?.initEnvironment(9999)
   }
 
   /**
