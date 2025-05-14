@@ -45,11 +45,10 @@ export default function BaseMap(props: Props) {
 
   useEffect(() => {
     // 获取 sdk web 服务地址
-    RTNWebMap3D?.getClientUrl().then(res => {
-      if (res) {
-        setClientUrl(res)
-      }
-    })
+    const res = RTNWebMap3D?.getClientUrl()
+    if (res) {
+      setClientUrl(res)
+    }
     return () => {
       Web3dUtils.getClient()?.scene.close()
       Web3dUtils.setClient(null)
