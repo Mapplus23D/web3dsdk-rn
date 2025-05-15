@@ -76,8 +76,6 @@ struct Index {
           jsBundleProvider: new TraceJSBundleProviderDecorator(
             new AnyJSBundleProvider([
               new MetroJSBundleProvider(),
-              MetroJSBundleProvider.fromServerIp("10.10.7.181", 8081),
-              new MetroJSBundleProvider("http://localhost:8081/index.bundle?platform=harmony&dev=true&minify=false"),
               // NOTE: to load the bundle from file, place it in
               // `/data/app/el2/100/base/com.rnoh.tester/files/bundle.harmony.js`
               // on your device. The path mismatch is due to app sandboxing on OpenHarmony
