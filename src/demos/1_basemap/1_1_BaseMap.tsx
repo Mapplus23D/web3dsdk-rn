@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, SectionList, SectionListData, SectionListRenderItemInfo, Text, TouchableOpacity, View } from 'react-native';
-import { DemoStackPageProps } from 'src/navigators/types';
 import Webmap3DView from "../../components/Webmap3DView";
+import { DemoStackPageProps } from '../../navigators/types';
 import { RTNWebMap3D } from '../../specs';
-import { Web3dUtils } from '../../utils';
+import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
+import { LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'BaseMap'> { }
 interface Section {
@@ -52,12 +53,21 @@ const TerrainLayers = {
 
 export default function BaseMap(props: Props) {
 
+  const [license, setLicense] = useState<ILicenseInfo | undefined>()
   const [clientUrl, setClientUrl] = useState<string | undefined>()
   const [panelVisible, setPanelVisible] = useState(false)
   const [layerData, setLayerData] = useState<Section[]>([])
 
   const rotateValue = useRef(new Animated.Value(0)).current; // 初始角度为0度
 
+  /** 激活许可 */
+  const initLicense = () => {
+    LicenseUtil.active().then(res => {
+      setLicense(res)
+    })
+  }
+
+  /** 初始化数据 */
   const initData = () => {
     const _baseLayers = Object.keys(BaseLayers).map((value, index) => {
       return BaseLayers[value as keyof typeof BaseLayers];
@@ -84,6 +94,7 @@ export default function BaseMap(props: Props) {
     ])
   }
 
+  /** 初始化默认图层 */
   const initLayers = () => {
     // 默认添加底图
     addImageLayer(BaseLayers.TIAN_MAP)
@@ -92,18 +103,26 @@ export default function BaseMap(props: Props) {
   }
 
   useEffect(() => {
-    // 获取 sdk web 服务地址
-    const res = RTNWebMap3D?.getClientUrl()
-    if (res) {
-      setClientUrl(res)
+    // 激活 sdk 许可
+    initLicense()
+  }, [])
+
+  useEffect(() => {
+    // 激活sdk后，初始化
+    if (license) {
+      // 获取 sdk web 服务地址
+      const res = RTNWebMap3D?.getClientUrl()
+      if (res) {
+        setClientUrl(res)
+      }
+      initData()
     }
-    initData()
     return () => {
       // 退出页面，关闭场景
       Web3dUtils.getClient()?.scene.close()
       Web3dUtils.setClient(null)
     }
-  }, [])
+  }, [license])
 
   useEffect(() => {
     // 添加按钮旋转动画
@@ -359,7 +378,7 @@ export default function BaseMap(props: Props) {
     )
   }
 
-  if (!clientUrl) return
+  if (!license || !clientUrl) return
 
   return (
     <Webmap3DView

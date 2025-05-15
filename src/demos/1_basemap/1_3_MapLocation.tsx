@@ -6,26 +6,42 @@ import { icon_location } from '../../assets';
 import Webmap3DView from "../../components/Webmap3DView";
 import { DemoStackPageProps } from '../../navigators/types';
 import { RTNWebMap3D } from '../../specs';
-import { Web3dUtils } from '../../utils';
+import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
+import { LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'MapLocation'> { }
 
 export default function MapLocation(props: Props) {
 
+  const [license, setLicense] = useState<ILicenseInfo | undefined>()
   const [clientUrl, setClientUrl] = useState<string | undefined>()
 
+  /** 激活许可 */
+  const initLicense = () => {
+    LicenseUtil.active().then(res => {
+      setLicense(res)
+    })
+  }
+
   useEffect(() => {
-    // 获取 sdk web 服务地址
-    const res = RTNWebMap3D?.getClientUrl()
-    if (res) {
-      setClientUrl(res)
+    // 激活 sdk 许可
+    initLicense()
+  }, [])
+
+  useEffect(() => {
+    if (license) {
+      // 获取 sdk web 服务地址
+      const res = RTNWebMap3D?.getClientUrl()
+      if (res) {
+        setClientUrl(res)
+      }
     }
 
     return () => {
       Web3dUtils.getClient()?.scene.close()
       Web3dUtils.setClient(null)
     }
-  }, [])
+  }, [license])
 
   const _onLoad = (client: Client) => {
     Web3dUtils.setClient(client);
@@ -56,7 +72,7 @@ export default function MapLocation(props: Props) {
     })
   }
 
-  if (!clientUrl) return
+  if (!license || !clientUrl) return
 
   return (
     <Webmap3DView

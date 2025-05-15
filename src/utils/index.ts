@@ -1,5 +1,7 @@
+import * as LicenseUtil from './LicenseUtil'
 import * as Web3dUtils from './Web3dUtils'
 
 export {
-  Web3dUtils
+  LicenseUtil, Web3dUtils
 }
+

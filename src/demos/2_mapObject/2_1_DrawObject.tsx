@@ -1,13 +1,16 @@
 import { Client, IMap3D } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, View } from 'react-native';
-import { DemoStackPageProps } from 'src/navigators/types';
 import Webmap3DView from '../../components/Webmap3DView';
+import { DemoStackPageProps } from '../../navigators/types';
 import { RTNWebMap3D } from '../../specs';
+import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
+import { LicenseUtil } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawObject'> { }
 
 export default function SceneGeneral(props: Props) {
+  const [license, setLicense] = useState<ILicenseInfo | undefined>()
   const [client, setClient] = useState<Client | undefined>();
   const [pointId, setPontId] = useState<string | undefined>();
   const [lineId, setLineId] = useState<string | undefined>();
@@ -22,13 +25,31 @@ export default function SceneGeneral(props: Props) {
     return base || ''
   }, [])
 
+  /** 激活许可 */
+  const initLicense = () => {
+    LicenseUtil.active().then(res => {
+      setLicense(res)
+    })
+  }
+
   useEffect(() => {
-    // 获取 sdk web 服务地址
-    const res = RTNWebMap3D?.getClientUrl()
-    if (res) {
-      setClientUrl(res)
-    }
+    // 激活 sdk 许可
+    initLicense()
   }, [])
+
+  useEffect(() => {
+    if (license) {
+      // 获取 sdk web 服务地址
+      const res = RTNWebMap3D?.getClientUrl()
+      if (res) {
+        setClientUrl(res)
+      }
+    }
+    return () => {
+      // 退出页面，关闭场景
+      client?.scene.close()
+    }
+  }, [license])
 
   useEffect(() => {
     init();

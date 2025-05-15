@@ -37,19 +37,19 @@ export default function Home({ navigation }: Props) {
   }
 
   /** 激活sdk */
-  function activate() {
-    // 激活序列号，替换为有效的序列号
-    const serial = 'XXV8W-2VZBM-WQNY7-VFQBV-7UDM2'
+  // function activate() {
+  //   // 激活序列号，替换为有效的序列号
+  //   const serial = 'XXV8W-2VZBM-WQNY7-VFQBV-7UDM2'
 
-    RTNWebMap3D?.activate(serial).then(res => {
-      if (res) {
-        console.log('激活成功')
-        getLicense()
-      } else {
-        console.log('激活失败')
-      }
-    })
-  }
+  //   RTNWebMap3D?.activate(serial).then(res => {
+  //     if (res) {
+  //       console.log('激活成功')
+  //       getLicense()
+  //     } else {
+  //       console.log('激活失败')
+  //     }
+  //   })
+  // }
 
   const renderLicenseInfo = () => {
     return license === undefined ? (
@@ -69,8 +69,8 @@ export default function Home({ navigation }: Props) {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       {renderLicenseInfo()}
-      <View style={{ marginTop: 20, width: 100 }}>
-        <Button title="激活" onPress={activate} />
+      <View style={{ marginTop: 20 }}>
+        <Button title="获取激活状态" onPress={getLicense} />
       </View>
       <View style={{ marginTop: 20 }}>
         <Button title="地图操作示例" onPress={() => navigation.navigate('DemoList')} />
