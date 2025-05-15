@@ -36,8 +36,12 @@ const DemoList = ({ navigation }: Props) => {
         title: '底图覆盖物',
         data: [
           {
-            title: '对象添加',
+            title: '几何图形',
             path: 'DrawObject',
+          },
+          {
+            title: '文字',
+            path: 'DrawText',
           },
         ],
       },

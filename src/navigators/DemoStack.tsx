@@ -3,6 +3,7 @@ import BaseMap from '../demos/1_basemap/1_1_BaseMap';
 import MapStyle from '../demos/1_basemap/1_2_MapStyle';
 import MapLocation from '../demos/1_basemap/1_3_MapLocation';
 import DrawObject from '../demos/2_mapObject/2_1_DrawObject';
+import DrawText from '../demos/2_mapObject/2_2_DrawText';
 import DemoList from '../demos/DemoList';
 import Home from '../pages/Home';
 import { DemoStackParamList } from './types';
@@ -21,6 +22,7 @@ export default function DemoStack() {
       <Stack.Screen name="BaseMap" component={BaseMap} />
       <Stack.Screen name="MapLocation" component={MapLocation} />
       <Stack.Screen name="MapStyle" component={MapStyle} />
+      <Stack.Screen name="DrawText" component={DrawText} />
     </Stack.Navigator>
   );
 }

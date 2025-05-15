@@ -733,6 +733,8 @@ export interface ScreenTextStyle {
 	["background-color"]: string;
 	border: string;
 	["border-radius"]: string;
+	["text-align"]: string;
+	padding: string;
 	opacity: string;
 }
 export interface ScreenItemBase {
@@ -748,10 +750,6 @@ export interface ScreenItemBase {
 	size?: {
 		/** pixle */
 		width?: number;
-		height?: number;
-		/** percent */
-		maxWidth?: number;
-		maxHeight?: number;
 	};
 	animations: IScreenAnimation[];
 }
@@ -1284,12 +1282,12 @@ export declare enum VerticalOrigin {
 	baseline = 3,
 	bottom = 4
 }
-declare enum HorizontalOrigin {
+export declare enum HorizontalOrigin {
 	left = 1,
 	center = 2,
 	right = 3
 }
-declare enum LabelStyle {
+export declare enum LabelStyle {
 	FILL = 1,
 	FILL_AND_OUTLINE = 2,
 	OUTLINE = 3
@@ -2774,6 +2772,77 @@ export type TCoordSys = "wgs84" | "gcj02" | "bd09";
 export type ICoordTrans = {
 	translate(points: number[][], from: TCoordSys, to: TCoordSys): number[][];
 };
+declare enum MeasureType {
+	/** 测面积模式 */
+	Area = "Area",
+	/** 测距离模式 */
+	Distance = "Distance",
+	/** 空间距离、水平距离、垂直距离三分量量算模式（测高模式） */
+	DVH = "DVH"
+}
+export interface InitMeasureParam {
+	/** 绘制，量算几何对象风格类型 */
+	clampMode?: ClampType;
+	/** 椭球类型 */
+	ellipsoidType?: EllipsoidType;
+	/** 是否显示标签 */
+	isShowLabel?: boolean;
+	/** 是否显示等高线 */
+	isShowContourLine?: boolean;
+}
+export interface MeasureResultDVHparam {
+	/** 空间距离 */
+	distance: number;
+	/** 垂直距离 */
+	vDistance: number;
+	/** 水平距离 */
+	hDistance: number;
+}
+/**
+ * 量算
+ */
+export type IMeasure = {
+	/**
+	 * 开始测量
+	 * @param measureTypeParam 测量类型
+	 * @param Param 测量参数
+	 * @returns boolean 是否执行完成
+	 */
+	beginMeasure: (measureTypeParam: MeasureType, Param: InitMeasureParam) => Promise<boolean>;
+	/**
+	 * 撤销当前测量（已提交的测量，不可撤销)
+	 * @returns Promise<void>
+	 */
+	undo: () => Promise<boolean>;
+	/**
+	 * 提交测量 （结束当前测量，可开始下一测量）
+	 * @returns Promise<void>
+	 */
+	completed: () => Promise<boolean>;
+	/**
+	 * 清空所有测量
+	 * @returns Promise<void>
+	 */
+	clear: () => Promise<boolean>;
+	/**
+	 * 添加测量点
+	 * @param position 测量点 经纬度类型的三维点
+	 * @returns Promise<void>
+	 */
+	addPoint: (position: Vector3) => Promise<void>;
+	/**
+	 * 添加预览点
+	 * @param position 预览点 经纬度类型的三维点
+	 * @param isShowPreview 是否显示预览效果
+	 * @returns
+	 */
+	updatePreviewPoint: (position: Vector3 | Vector2, isShowPreview: boolean) => Promise<boolean>;
+	/**
+	 * 获取预览的量算结果， 调用之前需要先调用updatePreviewPoint方法
+	 * @returns 预览量算结果，成功线面返回数字，高度返回对象，失败返回-1
+	 */
+	getPreviewMeasureResult: () => Promise<number | MeasureResultDVHparam>;
+};
 /**
  * GeometryTypes
  *
@@ -4004,77 +4073,6 @@ export type IScene = {
 	updateEntityLayerLabelByDiff: (layer: string, diff: Partial<ILabelStyle>) => void;
 	updateEntityLayerTerrainLabelByDiff: (layer: string, diff: Partial<ILabelStyle>) => void;
 };
-declare enum MeasureType {
-	/** 测面积模式 */
-	Area = "Area",
-	/** 测距离模式 */
-	Distance = "Distance",
-	/** 空间距离、水平距离、垂直距离三分量量算模式（测高模式） */
-	DVH = "DVH"
-}
-export interface InitMeasureParam {
-	/** 绘制，量算几何对象风格类型 */
-	clampMode?: ClampType;
-	/** 椭球类型 */
-	ellipsoidType?: EllipsoidType;
-	/** 是否显示标签 */
-	isShowLabel?: boolean;
-	/** 是否显示等高线 */
-	isShowContourLine?: boolean;
-}
-export interface MeasureResultDVHparam {
-	/** 空间距离 */
-	distance: number;
-	/** 垂直距离 */
-	vDistance: number;
-	/** 水平距离 */
-	hDistance: number;
-}
-/**
- * 量算
- */
-export type IMeasure = {
-	/**
-	 * 开始测量
-	 * @param measureTypeParam 测量类型
-	 * @param Param 测量参数
-	 * @returns boolean 是否执行完成
-	 */
-	beginMeasure: (measureTypeParam: MeasureType, Param: InitMeasureParam) => Promise<boolean>;
-	/**
-	 * 撤销当前测量（已提交的测量，不可撤销)
-	 * @returns Promise<void>
-	 */
-	undo: () => Promise<boolean>;
-	/**
-	 * 提交测量 （结束当前测量，可开始下一测量）
-	 * @returns Promise<void>
-	 */
-	completed: () => Promise<boolean>;
-	/**
-	 * 清空所有测量
-	 * @returns Promise<void>
-	 */
-	clear: () => Promise<boolean>;
-	/**
-	 * 添加测量点
-	 * @param position 测量点 经纬度类型的三维点
-	 * @returns Promise<void>
-	 */
-	addPoint: (position: Vector3) => Promise<void>;
-	/**
-	 * 添加预览点
-	 * @param position 预览点 经纬度类型的三维点
-	 * @param isShowPreview 是否显示预览效果
-	 * @returns
-	 */
-	updatePreviewPoint: (position: Vector3 | Vector2, isShowPreview: boolean) => Promise<boolean>;
-	/**
-	 * 获取预览的量算结果， 调用之前需要先调用updatePreviewPoint方法
-	 * @returns 预览量算结果，成功线面返回数字，高度返回对象，失败返回-1
-	 */
-	getPreviewMeasureResult: () => Promise<number | MeasureResultDVHparam>;
-};
 declare const enums: {
 	LineType: typeof LineType;
 	AnimatorType: typeof AnimatorType;
@@ -4100,6 +4098,8 @@ declare const enums: {
 	SLineType: typeof SLineType;
 	TilingSchemeType: typeof TilingSchemeType;
 	VerticalOrigin: typeof VerticalOrigin;
+	HorizontalOrigin: typeof HorizontalOrigin;
+	LabelStyle: typeof LabelStyle;
 };
 export interface RouteStop {
 	/** 站点名称 */
@@ -4461,16 +4461,18 @@ export type IScanEffect = {
 	/** 重置扫描线参数 */
 	reset: () => Promise<void>;
 };
-/** 发送消息实现接口 */
-export type MessagerSendHandler = (event: string) => void;
-export interface MessagerHandlers {
-	sendHandler: MessagerSendHandler;
-	handleLargeMessage?: (str: string, limit: number) => {
-		isLarge: boolean;
-		message: string;
-	};
-	decodeLargeMessage?: (base64: string) => string;
-}
+export type ITileCache = {
+	/**
+	 * 连接到本地缓存服务器
+	 * @param wsPort websocket端口
+	 * @param httpPort http端口
+	 */
+	connectToServer(wsPort: number, httpPort: number): void;
+	/**
+	 * 断开本地缓存服务器
+	 */
+	disconnectFromServer(): void;
+};
 /**
  * 场景
  */
@@ -4672,30 +4674,25 @@ export type ITrackingLayer = {
 	editEnd: () => Vector3[] | Circle | Rectangle | Spline;
 	translateEntity: (entityId: string, from: Vector2, to: Vector2) => Promise<boolean>;
 };
-export type ITileCache = {
-	/**
-	 * 连接到本地缓存服务器
-	 * @param wsPort websocket端口
-	 * @param httpPort http端口
-	 */
-	connectToServer(wsPort: number, httpPort: number): void;
-	/**
-	 * 断开本地缓存服务器
-	 */
-	disconnectFromServer(): void;
-};
+/** 发送消息实现接口 */
+export type MessagerSendHandler = (event: string) => void;
+export interface MessagerHandlers {
+	sendHandler: MessagerSendHandler;
+	handleLargeMessage?: (str: string, limit: number) => {
+		isLarge: boolean;
+		message: string;
+	};
+	decodeLargeMessage?: (base64: string) => string;
+}
 export interface ServerOption {
 	/**
 	 * 是否开启右上角导航
 	 */
 	navigation: boolean;
 }
-export interface ClientOption {
-	clientPort?: number;
-}
 export declare function createClient(handlers: MessagerHandlers): Client;
 export type Client = typeof enums & {
-	init: (container?: string, option?: Partial<ServerOption> & Partial<ClientOption>) => Promise<void>;
+	init: (container?: string, option?: Partial<ServerOption>) => Promise<void>;
 	handleMessage: (messageStr: string) => void;
 	destroy: () => Promise<void>;
 	addListener: <key extends keyof SuperMap3DEvent>(event: key, listener: (param: SuperMap3DEvent[key]) => void) => void;

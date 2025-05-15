@@ -1,3 +1,6 @@
+/**
+ * 几何图形绘制Demo
+ */
 import { Client, IMap3D } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, View } from 'react-native';
@@ -9,7 +12,7 @@ import { LicenseUtil } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawObject'> { }
 
-export default function SceneGeneral(props: Props) {
+export default function DrawObject(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
   const [client, setClient] = useState<Client | undefined>();
   const [pointId, setPontId] = useState<string | undefined>();

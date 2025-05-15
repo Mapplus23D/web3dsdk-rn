@@ -4,11 +4,14 @@ import { StackNavigationProp } from '@react-navigation/stack';
 export type DemoStackParamList = {
   DemoHome: undefined;
 
-  DrawObject: undefined;
   DemoList: undefined;
+
   BaseMap: undefined;
   MapStyle: undefined;
   MapLocation: undefined;
+
+  DrawObject: undefined;
+  DrawText: undefined;
 };
 
 export type DemoStackNavigationProps<

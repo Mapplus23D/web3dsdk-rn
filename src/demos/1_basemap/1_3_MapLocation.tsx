@@ -1,3 +1,6 @@
+/**
+ * 定位 Demo
+ */
 import Geolocation from '@react-native-oh-tpl/geolocation';
 import { Client } from 'client/webmap3d-client';
 import { useEffect, useState } from 'react';
