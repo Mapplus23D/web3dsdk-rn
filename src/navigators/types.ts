@@ -8,6 +8,7 @@ export type DemoStackParamList = {
   DemoList: undefined;
   BaseMap: undefined;
   MapStyle: undefined;
+  MapLocation: undefined;
 };
 
 export type DemoStackNavigationProps<

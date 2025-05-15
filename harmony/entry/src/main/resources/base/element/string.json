@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "web3dsdk"
+    },
+    {
+      "name": "location_permission",
+      "value": "该功能需要获取定位权限"
     }
   ]
 }

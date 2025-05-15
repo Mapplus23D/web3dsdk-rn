@@ -26,6 +26,10 @@ const DemoList = ({ navigation }: Props) => {
             title: '地图样式',
             path: 'MapStyle',
           },
+          {
+            title: '地图定位',
+            path: 'MapLocation',
+          },
         ],
       },
       {
