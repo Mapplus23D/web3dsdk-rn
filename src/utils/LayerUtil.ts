@@ -1,6 +1,21 @@
 import { Web3dUtils } from '.'
-import { getTiandituToken } from '../demos/1_basemap/1_1_BaseMap'
 
+const tiandituTokens = [
+  'f1a8416261b97ae978e755060db0638f',
+  '347ab5a4378dc173c4601cb7a9984207',
+  '7dcd4bcb67f04b4f3962a250c408c036',
+  'a2f64889ada70d272f13d1e4c6796c86',
+  '9faa3ff752cf23ac3fe2b3078d26b026',
+  '1e12081bc50e75b960d852a20d69e03b',
+]
+
+export function getTiandituToken() {
+  const rad = Math.floor(Math.random() * tiandituTokens.length)
+  const token = tiandituTokens[rad]
+  return token
+}
+
+/** 影像底图 */
 export const BaseLayers = {
   TIAN_MAP: '天地图',
   TIAN_VEC: '天地图矢量',
@@ -13,12 +28,14 @@ export const BaseLayers = {
   CHANG_GUANG: '长光卫星',
 }
 
+/** 路网底图 */
 export const RoadLayers = {
   ROAD: '天地图路网',
   ROAD_CHINA: '全国大字体路网',
   XINGQIU_ROAD: '星图地球路网',
 }
 
+/** 地形底图 */
 export const TerrainLayers = {
   TERRAIN_STK: 'STK地形',
   TERRAIN_TIAN: '天地图地形',
