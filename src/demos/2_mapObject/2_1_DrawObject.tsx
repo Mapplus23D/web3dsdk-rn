@@ -1,10 +1,10 @@
 /**
  * 几何图形绘制Demo
  */
-import { Client, Entity, Vector3 } from 'client/webmap3d-client';
+import { Circle, Client, Entity, Vector3 } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { icon_aim_point, icon_line_black, icon_point_black, icon_region_black } from '../../assets';
+import { icon_aim_point, icon_circle_region, icon_line_black, icon_line_curve_black, icon_line_dashed, icon_point_black, icon_region_black } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
 import { RTNWebMap3D } from '../../specs';
@@ -13,15 +13,35 @@ import { LicenseUtil } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawObject'> { }
 
+/** 绘制类型 */
+enum DrawType {
+  Null,
+  /** 点 */
+  Point,
+  /** 线 */
+  Line,
+  /** 虚线 */
+  DashLine,
+  /** 曲线 */
+  Spline,
+  /** 面 */
+  Region,
+  /** 圆 */
+  Circle,
+}
+
 export default function DrawObject(props: Props) {
   const PointLayer = 'point'
   const LineLayer = 'line'
+  const DashLine = 'dashline'
+  const SplineLayer = 'spline'
   const RegionLayer = 'region'
+  const CircleLayer = 'circle'
 
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
   const [client, setClient] = useState<Client | undefined>();
 
-  const [drawType, setDrawType] = useState<'point' | 'region' | 'line' | undefined>();
+  const [drawType, setDrawType] = useState<DrawType>(DrawType.Null);
 
   /** 准星图标句柄 用于获取屏幕坐标 */
   const aimPointImageRef = useRef<Image>(null)
@@ -138,6 +158,10 @@ export default function DrawObject(props: Props) {
           visible: true,
         },
         {
+          name: 'spline',
+          visible: true,
+        },
+        {
           name: 'region',
           visible: true,
         },
@@ -188,9 +212,7 @@ export default function DrawObject(props: Props) {
     await flyToInitPosition();
     await addImageLayer();
     await setTerrainLayer();
-    await addPointLayer();
-    await addLineLayer();
-    await addRegionLayer();
+    await addDefaultLayer();
   }
 
   /**
@@ -245,33 +267,23 @@ export default function DrawObject(props: Props) {
   }
 
   /**
-   * 添加一个entity图层用来存放点对象
+   * 添加一个entity图层用来存放对应类型对象，名称可自定义
    */
-  async function addPointLayer() {
+  async function addDefaultLayer() {
     if (!client) return;
 
-    // 添加一个名为 `point` 的图层
+    // 添加一个名为 `point` 的图层，存放点对象
     await client.scene.addEntitiesLayer(PointLayer);
-  }
-
-  /**
-   * 添加一个entity图层用来存放线对象
-   */
-  async function addLineLayer() {
-    if (!client) return;
-
-    // 添加一个名为 `line` 的图层
+    // 添加一个名为 `line` 的图层，存放线对象
     await client.scene.addEntitiesLayer(LineLayer);
-  }
-
-  /**
-   * 添加一个entity图层用来存放线对象
-   */
-  async function addRegionLayer() {
-    if (!client) return;
-
-    // 添加一个名为 `region` 的图层
+    // 添加一个名为 `dashline` 的图层，存放虚线对象
+    await client.scene.addEntitiesLayer(DashLine);
+    // 添加一个名为 `spline` 的图层，存放曲线对象
+    await client.scene.addEntitiesLayer(SplineLayer);
+    // 添加一个名为 `region` 的图层，存放面对象
     await client.scene.addEntitiesLayer(RegionLayer);
+    // 添加一个名为 `circle` 的图层，存放圆对象
+    await client.scene.addEntitiesLayer(CircleLayer);
   }
 
   const getDrawPosition = async (): Promise<Vector3 | null> => {
@@ -360,13 +372,22 @@ export default function DrawObject(props: Props) {
       editPoints.current.push(llPoint)
     } else {
       switch (drawType) {
-        case 'line':
-          // 开始绘制线
+        case DrawType.Line:
+        case DrawType.DashLine:
+          // 开始绘制线/虚线
           await client.scene.trackingLayer.editPolyline(client.ClassificationType.BOTH)
           break
-        case 'region':
+        case DrawType.Spline:
+          // 开始绘制曲线
+          await client.scene.trackingLayer.editSpline(client.ClassificationType.BOTH, 1, 10)
+          break
+        case DrawType.Region:
           // 开始绘制面
           await client.scene.trackingLayer.editPolygon(client.ClassificationType.BOTH)
+          break
+        case DrawType.Circle:
+          // 开始绘制圆
+          await client.scene.trackingLayer.editCircle(client.ClassificationType.BOTH, false)
           break
       }
 
@@ -379,39 +400,92 @@ export default function DrawObject(props: Props) {
 
   /** 提交绘制 */
   const _submit = async () => {
-    if (!client || (drawType !== 'line' && drawType !== 'region')) return
-    if (drawType === 'line' && editPoints.current.length < 2) {
+    if (!client || drawType === DrawType.Null || drawType === DrawType.Point) return
+    if ((drawType === DrawType.Line || drawType === DrawType.Spline || drawType === DrawType.DashLine) && editPoints.current.length < 2) {
       // 画线需要至少2个点
       return
     }
-    if (drawType === 'region' && editPoints.current.length < 3) {
+    if (drawType === DrawType.Region && editPoints.current.length < 3) {
       // 画面需要至少3个点
       return
     }
     let layerName = ''
-    const points = await client.scene.trackingLayer.editEnd() as Vector3[]
+    const points = await client.scene.trackingLayer.editEnd()
     let _entity: Entity | null = null
     switch (drawType) {
-      case 'line':
-        layerName = 'line'
+      case DrawType.Line:
+        layerName = LineLayer
         _entity = {
           polyline: {
             positions: points,
             // 线型为实线
             lineType: client.LineType.solid,
+            // 贴地模式，这里设置为贴地
+            classificationType: client.ClassificationType.BOTH,
             // 实线材质颜色
             material: 'rgba(0,235,235,.6)',
           },
         }
         break
-      case 'region':
-        layerName = 'region'
+      case DrawType.DashLine:
+        layerName = DashLine
+        _entity = {
+          polyline: {
+            positions: points,
+            width: 6,
+            // 线型为实线
+            lineType: client.LineType.dashed,
+            // 贴地模式，这里设置为贴地
+            classificationType: client.ClassificationType.BOTH,
+            // 实线材质颜色
+            material: {
+              /** 前景色 */
+              color: 'rgba(0,235,235,.6)',
+              /** 背景色 */
+              gapColor: 'rgba(250, 28, 28, 0.6)',
+              /** 间隔 */
+              dashLength: 10,
+            },
+          },
+        }
+        break
+      case DrawType.Spline:
+        layerName = SplineLayer
+        _entity = {
+          polyline: {
+            positions: points,
+            width: 6,
+            // 线型为实线
+            lineType: client.LineType.solid,
+            // 贴地模式，这里设置为贴地
+            classificationType: client.ClassificationType.BOTH,
+            // 实线材质颜色
+            material: 'rgba(0,235,235,.6)',
+          },
+        }
+        break
+      case DrawType.Region:
+        layerName = LineLayer
         _entity = {
           polygon: {
             hierarchy: {
               //面的点串，按顺序分别为 [经度，纬度，高度，经度，纬度，高度，... ]
-              positions: points,
+              positions: points as Vector3[],
             },
+            // 贴地模式，这里设置为贴地
+            classificationType: client.ClassificationType.BOTH,
+            // 面的填充模式，设置为纯色填充
+            fillType: client.FillType.solid,
+            // 设置填充颜色
+            material: 'rgba(245,158,52,.6)',
+          },
+        }
+        break
+      case DrawType.Circle:
+        layerName = CircleLayer
+        _entity = {
+          polygon: {
+            hierarchy: points as Circle,
             // 贴地模式，这里设置为贴地
             classificationType: client.ClassificationType.BOTH,
             // 面的填充模式，设置为纯色填充
@@ -428,7 +502,7 @@ export default function DrawObject(props: Props) {
     const entityId = await client.scene.addEntity(layerName, _entity)
 
     // 记录添加的对象的id
-    history.current.push({ layer: drawType === 'line' ? LineLayer : RegionLayer, id: entityId })
+    history.current.push({ layer: layerName, id: entityId })
 
     // 清除绘制虚线对象
     await client.scene.trackingLayer.removeAll()
@@ -447,13 +521,14 @@ export default function DrawObject(props: Props) {
   /** 开始绘制 */
   const _draw = () => {
     switch (drawType) {
-      case 'point':
+      case DrawType.Point:
         addPoint()
         break
-      case 'line':
-        drawPoint()
-        break
-      case 'region':
+      case DrawType.Line:
+      case DrawType.DashLine:
+      case DrawType.Spline:
+      case DrawType.Region:
+      case DrawType.Circle:
         drawPoint()
         break
     }
@@ -481,25 +556,46 @@ export default function DrawObject(props: Props) {
             marginLeft: 10,
           }}>
           <TouchableOpacity
-            style={[styles.methodBtn, { backgroundColor: drawType === 'point' ? '#4680DF' : '#fff' }]}
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Point ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setDrawType(type => type === 'point' ? undefined : 'point')}
+            onPress={() => setDrawType(type => type === DrawType.Point ? DrawType.Null : DrawType.Point)}
           >
             <Image source={icon_point_black} style={styles.methodBtnImg} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.methodBtn, { backgroundColor: drawType === 'line' ? '#4680DF' : '#fff' }]}
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Line ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setDrawType(type => type === 'line' ? undefined : 'line')}
+            onPress={() => setDrawType(type => type === DrawType.Line ? DrawType.Null : DrawType.Line)}
           >
             <Image source={icon_line_black} style={[styles.methodBtnImg, { width: 24, height: 24 }]} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.methodBtn, { backgroundColor: drawType === 'region' ? '#4680DF' : '#fff' }]}
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.DashLine ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setDrawType(type => type === 'region' ? undefined : 'region')}
+            onPress={() => setDrawType(type => type === DrawType.DashLine ? DrawType.Null : DrawType.DashLine)}
+          >
+            <Image source={icon_line_dashed} style={[styles.methodBtnImg, { width: 24, height: 24 }]} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Region ? '#4680DF' : '#fff' }]}
+            activeOpacity={0.8}
+            onPress={() => setDrawType(type => type === DrawType.Region ? DrawType.Null : DrawType.Region)}
           >
             <Image source={icon_region_black} style={styles.methodBtnImg} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Spline ? '#4680DF' : '#fff' }]}
+            activeOpacity={0.8}
+            onPress={() => setDrawType(type => type === DrawType.Spline ? DrawType.Null : DrawType.Spline)}
+          >
+            <Image source={icon_line_curve_black} style={styles.methodBtnImg} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Circle ? '#4680DF' : '#fff' }]}
+            activeOpacity={0.8}
+            onPress={() => setDrawType(type => type === DrawType.Circle ? DrawType.Null : DrawType.Circle)}
+          >
+            <Image source={icon_circle_region} style={styles.methodBtnImg} />
           </TouchableOpacity>
         </View>
       </View>
