@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "AwesomeProject0752.app"
-               BlueprintName = "AwesomeProject0752"
-               ReferencedContainer = "container:AwesomeProject0752.xcodeproj">
+               BuildableName = "MapPlusWeb3DSDK.app"
+               BlueprintName = "MapPlusWeb3DSDK"
+               ReferencedContainer = "container:MapPlusWeb3DSDK.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
                BuildableName = "AwesomeProject0752Tests.xctest"
                BlueprintName = "AwesomeProject0752Tests"
-               ReferencedContainer = "container:AwesomeProject0752.xcodeproj">
+               ReferencedContainer = "container:MapPlusWeb3DSDK.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "AwesomeProject0752.app"
-            BlueprintName = "AwesomeProject0752"
-            ReferencedContainer = "container:AwesomeProject0752.xcodeproj">
+            BuildableName = "MapPlusWeb3DSDK.app"
+            BlueprintName = "MapPlusWeb3DSDK"
+            ReferencedContainer = "container:MapPlusWeb3DSDK.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "AwesomeProject0752.app"
-            BlueprintName = "AwesomeProject0752"
-            ReferencedContainer = "container:AwesomeProject0752.xcodeproj">
+            BuildableName = "MapPlusWeb3DSDK.app"
+            BlueprintName = "MapPlusWeb3DSDK"
+            ReferencedContainer = "container:MapPlusWeb3DSDK.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

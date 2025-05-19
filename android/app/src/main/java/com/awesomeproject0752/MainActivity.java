@@ -13,7 +13,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "AwesomeProject0752";
+    return "MapPlusWeb3DSDK";
   }
 
   /**

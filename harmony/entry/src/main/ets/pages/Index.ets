@@ -68,7 +68,7 @@ struct Index {
             ]
           },
           initialProps: { "foo": "bar" } as Record<string, string>,
-          appKey: "AwesomeProject0752",
+          appKey: "MapPlusWeb3DSDK",
           wrappedCustomRNComponentBuilder: wrappedCustomRNComponentBuilder,
           onSetUp: (rnInstance) => {
             rnInstance.enableFeatureFlag("ENABLE_RN_INSTANCE_CLEAN_UP")
