@@ -1,0 +1,4 @@
+{
+  "entryPoints": ["webmap3d-client.d.ts"],
+  "out": "docs"
+}
