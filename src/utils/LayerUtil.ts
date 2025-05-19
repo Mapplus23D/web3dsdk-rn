@@ -50,22 +50,29 @@ export async function addImageLayer(name: string) {
   // 获取影像图层
   const layer = await client.scene.getImageLayers()
   if (layer && layer?.length > 0) {
-    layer.forEach(async (data, index) => {
+    let isRemove = false
+    for (let index = 0; index < layer.length; index++) {
+      const data = layer[index];
       if (data.name !== name && (
         data.name === BaseLayers.BING_MAP
-        || data.name !== BaseLayers.GEOVIS_TER
-        || data.name !== BaseLayers.GEOVIS_IMG
-        || data.name !== BaseLayers.SIWEIEARTH
-        || data.name !== BaseLayers.GEOVIS_VEC
-        || data.name !== BaseLayers.TIAN_MAP
-        || data.name !== BaseLayers.TIAN_VEC
-        || data.name !== BaseLayers.TIAN_TER
-        || data.name !== BaseLayers.CHANG_GUANG
+        || data.name === BaseLayers.GEOVIS_TER
+        || data.name === BaseLayers.GEOVIS_IMG
+        || data.name === BaseLayers.SIWEIEARTH
+        || data.name === BaseLayers.GEOVIS_VEC
+        || data.name === BaseLayers.TIAN_MAP
+        || data.name === BaseLayers.TIAN_VEC
+        || data.name === BaseLayers.TIAN_TER
+        || data.name === BaseLayers.CHANG_GUANG
       )) {
         // 添加底图前，先移除之前的底图
         await client.scene.removeImageLayer(index)
+      } else if (data.name === name) {
+        // 添加底图前，先移除之前的底图
+        await client.scene.removeImageLayer(index)
+        isRemove = true
       }
-    })
+      if (isRemove) return
+    }
   }
   // 根据名称，使用client.scene.addImagelayer添加对应底图
   switch (name) {
@@ -159,20 +166,27 @@ export async function addRoadLayer(name: string) {
   // 获取三维地图sdk实例
   const client = Web3dUtils.getClient()
   if (!client) return
-  let url = ''
   if (name !== '') {
     // 获取影像图层
     const layer = await client.scene.getImageLayers()
     if (layer && layer?.length > 0) {
-      layer.forEach(async (data, index) => {
+      let isRemove = false
+      for (let index = 0; index < layer.length; index++) {
+        const data = layer[index];
         if (data.name !== name && (
           data.name === RoadLayers.ROAD
-          || data.name !== RoadLayers.ROAD_CHINA
+          || data.name === RoadLayers.ROAD_CHINA
+          || data.name === RoadLayers.XINGQIU_ROAD
         )) {
           // 添加底图前，先移除之前的底图
           await client.scene.removeImageLayer(index)
+        } else if (data.name === name) {
+          // 添加底图前，先移除之前的底图
+          await client.scene.removeImageLayer(index)
+          isRemove = true
         }
-      })
+      }
+      if (isRemove) return
     }
 
     switch (name) {

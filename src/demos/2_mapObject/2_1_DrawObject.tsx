@@ -102,103 +102,8 @@ export default function DrawObject(props: Props) {
     // 若需要使用资源包中的资源，则需要设置资源路径
     client.scene.setResourceBase(resourceBase)
 
-    //对于地图初始化可以通过 `client.scene.open` 直接打开配置好的地图参数进行
-    //或者手动调用相关方法进行
-
-    // openInitMap() 方法内直接通过 `client.scene.open`来打开地图
-    // openInitMap()
-
     // prepareInitMap()通过相机飞行，手动添加地形影像图层来达到相同效果
     prepareInitMap();
-  }
-
-  /**
-   * 打开地图
-   *
-   * 通常我们完成一副地图后，可以通过
-   *
-   * `client.scene.getMap()` 以JSON形式获取当前地图的各种参数
-   *
-   * 后续可以通过 `client.scene.open()` 接口打开保存的地图，还原制作的场景
-   *
-   * 这里我们直接构造一个简单的地图结构来打开
-   *
-   * 地图的类型为 IMap3D, 除了 version， id 及 camera 外，其他参数可省略
-   */
-  async function openInitMap() {
-    if (!client) return;
-
-    client.scene.open({
-      version: 1,
-      id: 1,
-      /** 相机所在地理位置及俯仰姿态角度参数 */
-      camera: {
-        //经度
-        longitude: 101.64439721507041,
-        //维度
-        latitude: 29.08165789172511,
-        //高度
-        altitude: 5999049.208713511,
-        //正北方向角度
-        heading: 0,
-        //俯仰角度
-        pitch: -90,
-        //倾斜角度
-        roll: 0,
-      },
-
-      /** entity 图层，用来存放点线面等对象 */
-      entitiesLayers: [
-        {
-          name: 'point',
-          visible: true,
-        },
-        {
-          name: 'line',
-          visible: true,
-        },
-        {
-          name: 'spline',
-          visible: true,
-        },
-        {
-          name: 'region',
-          visible: true,
-        },
-      ],
-
-      /** 影像图层，可填多个，后面的图层会盖再前面的图层上面 */
-      imageLayers: [
-        {
-          //图层名
-          name: 'image 1',
-          visible: true,
-          //图层参数， 目前支持 Supermap ，bing 和天地图，详细参数参考 ImageProvider
-          provider: {
-            type: client.ProviderType.BING,
-            url: 'https://dev.virtualearth.net',
-            mapStyle: client.BingMapsStyle.AERIAL,
-            key: 'AgYCj_VzN0MWJ-4pgJj3I7bZym9kmbb-HDWjG5cgHFJxNOokbRcSEtUwJM3uWweh',
-          },
-        },
-      ],
-
-      /** 地形图层 只能有一个*/
-      terrainLayer: {
-        //图层名
-        name: 'terrain',
-        //图层参数， 目前支持 Supermap 和天地图，详细参数参考 TerrainProvider
-        provider: {
-          type: client.ProviderType.SUPERMAP,
-          url: 'https://www.supermapol.com/realspace/services/3D-stk_terrain/rest/realspace/datas/info/data/path',
-          invisibility: true,
-          requestWaterMask: true,
-          requestVertexNormals: true,
-          isSct: false,
-        },
-        visible: true,
-      },
-    });
   }
 
   /**
@@ -344,20 +249,6 @@ export default function DrawObject(props: Props) {
         heightReference: client.HeightReference.RELATIVE_TO_GROUND,
       },
     });
-
-    // 若添加了资源包，可在这里使用资源中的图片添加一个billboard
-    await client.scene.addEntity(PointLayer, {
-      //点位置
-      position: {
-        x: 102,  // 经度
-        y: 30,   // 纬度
-        z: 1000, // 高度
-      },
-      billboard: {
-        image: `${resourceBase}/resource/symbol/image/ATM.png`,
-      }
-    });
-
     // 记录添加的对象的id
     history.current.push({ layer: PointLayer, id })
   }
