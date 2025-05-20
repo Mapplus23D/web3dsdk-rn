@@ -15,6 +15,10 @@
     {
       "name": "location_permission",
       "value": "该功能需要获取定位权限"
+    },
+    {
+      "name": "file_access_permission",
+      "value": "该功能需要获取文件访问权限"
     }
   ]
 }

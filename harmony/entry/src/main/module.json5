@@ -37,6 +37,16 @@
               ],
             "when": "always"
          }
+      },
+      {
+        "name": "ohos.permission.FILE_ACCESS_PERSIST",
+        "reason": "$string:file_access_permission",
+        "usedScene": {
+            "abilities": [
+                "EntryAbility"
+              ],
+            "when": "always"
+         }
       }
     ],
     "abilities": [

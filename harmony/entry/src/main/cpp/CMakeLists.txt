@@ -14,6 +14,7 @@ set(WITH_HITRACE_SYSTRACE 1) # for other CMakeLists.txt files to use
 add_subdirectory("${RNOH_CPP_DIR}" ./rn)
 add_subdirectory("${OH_MODULE_DIR}/@react-native-oh-tpl/react-native-safe-area-context/src/main/cpp" ./safe-area)
 add_subdirectory("${OH_MODULE_DIR}/@react-native-oh-tpl/geolocation/src/main/cpp" ./geolocation)
+add_subdirectory("${OH_MODULE_DIR}/@react-native-ohos/react-native-fs/src/main/cpp" ./fs)
 
 file(GLOB GENERATED_CPP_FILES "./generated/*.cpp")
 
@@ -26,3 +27,4 @@ add_library(rnoh_app SHARED
 target_link_libraries(rnoh_app PUBLIC rnoh)
 target_link_libraries(rnoh_app PUBLIC rnoh_safe_area)
 target_link_libraries(rnoh_app PUBLIC rnoh_geolocation)
+target_link_libraries(rnoh_app PUBLIC rnoh_fs)
