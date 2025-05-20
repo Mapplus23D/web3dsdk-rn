@@ -98,10 +98,10 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
           // 读取文件内容到数组缓冲区
           readLen = fileIo.readSync(file.fd, arrayBuffer, option);
           if (readLen > 0) {
-            let buffArr = new Uint8Array(arrayBuffer)
-            content += helper.encodeToStringSync(buffArr)
-            // let buf = buffer.from(arrayBuffer, 0, readLen);
-            // content += buf.toString();
+            // let buffArr = new Uint8Array(arrayBuffer)
+            // content += helper.encodeToStringSync(buffArr)
+            let buf = buffer.from(arrayBuffer, 0, readLen);
+            content += buf.toString();
             // 更新下一次读取的偏移量，继续从文件后续位置读取
             option.offset += readLen;
           }
