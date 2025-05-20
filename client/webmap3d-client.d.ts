@@ -2129,6 +2129,7 @@ export interface PrimitiveBase {
 	};
 }
 export type Primitive = PrimitiveSolidPoint | PrimitiveBillboard | PrimitiveLabel | PrimitiveTerrainLabel | PrimitiveModel | PrimitiveSolidLine | PrimitiveDashedLine | PrimitiveContourLine | PrimitiveArrowLine | PrimitiveHaloLine | PrimitiveWallLine | PrimitiveSolidRegion | PrimitiveGridRegion | PrimitiveStripeRegion | PrimitiveImageRegion | PrimitiveWaterRegion | PrimitiveFeatherRegion | PrimitiveColumnModel;
+export type PrimitiveUniform = Omit<PrimitiveSolidPoint, keyof UniformPrimitiveData> | Omit<PrimitiveBillboard, keyof UniformPrimitiveData> | Omit<PrimitiveLabel, keyof UniformPrimitiveData> | Omit<PrimitiveTerrainLabel, keyof UniformPrimitiveData> | Omit<PrimitiveModel, keyof UniformPrimitiveData> | Omit<PrimitiveSolidLine, keyof UniformPrimitiveData> | Omit<PrimitiveDashedLine, keyof UniformPrimitiveData> | Omit<PrimitiveContourLine, keyof UniformPrimitiveData> | Omit<PrimitiveArrowLine, keyof UniformPrimitiveData> | Omit<PrimitiveHaloLine, keyof UniformPrimitiveData> | Omit<PrimitiveWallLine, keyof UniformPrimitiveData> | Omit<PrimitiveSolidRegion, keyof UniformPrimitiveData> | Omit<PrimitiveGridRegion, keyof UniformPrimitiveData> | Omit<PrimitiveStripeRegion, keyof UniformPrimitiveData> | Omit<PrimitiveImageRegion, keyof UniformPrimitiveData> | Omit<PrimitiveWaterRegion, keyof UniformPrimitiveData> | Omit<PrimitiveFeatherRegion, keyof UniformPrimitiveData> | Omit<PrimitiveColumnModel, keyof UniformPrimitiveData>;
 export interface PrimitiveSolidPoint extends PrimitiveBase {
 	type: PrimitiveType.SolidPoint;
 	/** 位置 */
@@ -4290,6 +4291,9 @@ export type IMagnifier = {
 		radius?: number;
 	}) => Promise<void>;
 };
+export type IMServer = {
+	setServerAddress(addr: string): void;
+};
 export type IParticleLayers = {
 	/**
 	 * 添加图层（已有同名图层添加失败）
@@ -4384,6 +4388,201 @@ export type IParticleLayers = {
 	/** 获取所有对象个数 */
 	getAllCount: () => number;
 };
+export type IPrimitiveLayers = {
+	/**
+	 * 添加图层（已有同名图层添加失败）
+	 * @param name 图层名
+	 * @param uniform 统一风格 默认undefined
+	 * @param propertyInfos 属性表
+	 * @param 数据和属性关联表
+	 * @returns 成功/失败
+	 */
+	addPrimitiveLayer: (name: string, uniform?: PrimitiveUniform, propertyInfos?: PropertyInfo[], uniformPrimitiveDataPropertyMap?: UniformPrimitiveDataPropertyMap) => boolean;
+	/**
+	 * 删除图层
+	 * @param name 图层名
+	 * @returns 成功/失败
+	 */
+	removePrimitiveLayer: (name: string) => boolean;
+	/**
+	 * 删除所有图层
+	 * @returns 成功/失败
+	 */
+	removeAllPrimitiveLayers: () => boolean;
+	/**
+	 * 清空图层
+	 * @param name 图层名
+	 * @returns 成功/失败
+	 */
+	clearPrimitiveLayer: (name: string) => boolean;
+	/**
+	 * 图层是否可见
+	 * @param name 图层名
+	 * @returns 成功/失败
+	 */
+	isPrimitiveLayerVisible: (name: string) => boolean;
+	/**
+	 * 设置图层是否可见
+	 * @param name 图层名
+	 * @param isVisible 是否可见
+	 */
+	setPrimitiveLayerVisible: (name: string, isVisible: boolean) => void;
+	/**
+	 * 获取所有粒子图层名
+	 * @returns 图层名数组
+	 */
+	getPrimitiveLayerNames: () => string[];
+	/**
+	 * 重命名
+	 * @param oldName 原图层名
+	 * @param newName 新图层名
+	 * @returns 成功/失败
+	 */
+	renamePrimitiveLayer: (oldName: string, newName: string) => boolean;
+	/**
+	 * 图层添加对象
+	 * @param layerName 图层名
+	 * @param primitive 对象参数（若id不为undefined，会查重）
+	 * @returns 对象id (undefined表示添加失败)
+	 */
+	layerAddPrimitive: (layerName: string, primitive: (Primitive | Partial<UniformPrimitiveData>) & {
+		id?: string;
+	}) => string | undefined;
+	/**
+	 * 图层删除对象
+	 * @param name 图层名
+	 * @param particleName 粒子id
+	 * @returns 成功/失败
+	 */
+	layerRemovePrimitive: (layerName: string, primitiveId: string) => boolean;
+	/**
+	 * 获取图层所有对象
+	 * @param name 图层名
+	 * @param indexRange 数据索引范围默认所有 start默认0 end(不含)默认到最后+1
+	 * @returns 对象数组
+	 */
+	layerPrimitives: (layerName: string, indexRange?: {
+		start?: number;
+		end?: number;
+	}) => (Primitive & {
+		id: string;
+	})[];
+	/**
+	 * 获取图层统一风格
+	 * @param name 图层名
+	 * @returns
+	 */
+	getLayerPrimitiveUniform: (layerName: string) => PrimitiveUniform | undefined;
+	/**
+	 * 设置图层统一风格
+	 * @param name 图层名
+	 * @param uniform
+	 * @returns 设置是否成功
+	 */
+	setLayerPrimitiveUniform: (layerName: string, uniform: PrimitiveUniform) => boolean;
+	/** 属性表头 */
+	getLayerPrimitivePropertyInfos: (layerName: string) => PropertyInfo[];
+	getLayerPrimitivePropertyInfoNames: (layerName: string) => string[];
+	getLayerPrimitivePropertyInfo: (layerName: string, infoName: string) => PropertyInfo | undefined;
+	/** 添加一条属性
+	 * @param info
+	 * @returns 同名存在添加失败
+	 */
+	addLayerPrimitivePropertyInfo: (layerName: string, info: PropertyInfo) => boolean;
+	removeLayerPrimitivePropertyInfo: (layerName: string, infoName: string) => boolean;
+	/** propertyName valueType 不能改 */
+	modifyLayerPrimitivePropertyInfo: (layerName: string, info: Omit<PropertyInfo, "valueType">) => boolean;
+	getLayerUniformPrimitiveDataPropertyMap: (layerName: string) => UniformPrimitiveDataPropertyMap;
+	loadLayerUniformPrimitiveDataPropertyMap: (layerName: string, map: UniformPrimitiveDataPropertyMap) => void;
+	setLayerUniformPrimitiveDataFromProperty: (layerName: string, dataType: keyof UniformPrimitiveDataPropertyMap, value: unknown) => boolean;
+	/**
+	 * 更新图层对象
+	 * @param layerName 图层名
+	 * @param primitive 参数
+	 * @returns 成功/失败
+	 */
+	layerModifyPrimitive: (layerName: string, primitive: Partial<Primitive> & {
+		id: string;
+	}) => boolean;
+	/** 获取指定的对象
+	 * @param layerName 图层名
+	 * @param id
+	 * @returns
+	 */
+	getPrimitive: (layerName: string, id: string) => (Primitive & {
+		id: string;
+	}) | undefined;
+	/** 获取指定的对象属性
+	 * @param layerName 图层名
+	 * @param id
+	 * @returns
+	 */
+	getPrimitiveProperties: (layerName: string, id: string) => {
+		[_: string]: unknown;
+	} | undefined;
+	/** 获取指定图层中可用对象名称
+	 * @param layerName
+	 * @param name
+	 * @returns
+	 */
+	getAvailableName: (layerName: string, name: string) => string;
+	/**
+	 * 全幅primitive矢量
+	 * @param layerName
+	 * @param primitiveId
+	 * @param duration 动画时间
+	 * @returns 设置是否成功
+	 */
+	viewEntirePrimitive: (layerName: string, primitiveId: string, duration: number) => Promise<boolean>;
+	/** 获取图层对象个数 */
+	getPrimitiveCount: (layerName: string) => number;
+	/** 获取所有对象个数 */
+	getAllCount: () => number;
+	/** 导出 */
+	exportPrimitivesAsEntities: (primitives: (Primitive & {
+		id?: string;
+	})[]) => Entity[];
+	/** 导出kml */
+	exportPrimitivesAsKml: (primitives: (Primitive & {
+		id?: string;
+	})[]) => Promise<string>;
+	/** 导出Geojson */
+	exportPrimitivesAsGeojson: (primitives: (Primitive & {
+		id?: string;
+	})[]) => FeatureCollection;
+	/** 导入kml */
+	addPrimitivesFromKml: (layerName: string, kmlContent: string, option?: {
+		clampToGround?: boolean;
+		uniform?: PrimitiveUniform;
+		columnModelHeightRange?: {
+			min?: number;
+			max?: number;
+		};
+		autoNamedIfEmpty?: boolean;
+	}) => Promise<boolean>;
+	addPrimitivesFromKmlURI: (layerName: string, kmluri: string, option?: {
+		clampToGround?: boolean;
+		uniform?: PrimitiveUniform;
+		columnModelHeightRange?: {
+			min?: number;
+			max?: number;
+		};
+		autoNamedIfEmpty?: boolean;
+	}) => Promise<boolean>;
+	/** 从Entities添加对象 */
+	addPrimitivesFromEntities: (layerName: string, entities: Entity[], option?: {
+		uniform?: PrimitiveUniform; /** 非uniform有效 */
+		columnModelHeightRange?: {
+			min?: number;
+			max?: number;
+		};
+	}) => boolean;
+	/** 导入geojson */
+	addPrimitivesFromGeojson: (layerName: string, featureCollection: FeatureCollection, option?: {
+		uniform?: PrimitiveUniform; /** 非uniform有效 */
+		autoNamedIfEmpty?: boolean;
+	}) => Promise<boolean>;
+};
 /**
  * 扫描线效果
  * 使用时需要开启深度检测
@@ -4461,18 +4660,16 @@ export type IScanEffect = {
 	/** 重置扫描线参数 */
 	reset: () => Promise<void>;
 };
-export type ITileCache = {
-	/**
-	 * 连接到本地缓存服务器
-	 * @param wsPort websocket端口
-	 * @param httpPort http端口
-	 */
-	connectToServer(wsPort: number, httpPort: number): void;
-	/**
-	 * 断开本地缓存服务器
-	 */
-	disconnectFromServer(): void;
-};
+/** 发送消息实现接口 */
+export type MessagerSendHandler = (event: string) => void;
+export interface MessagerHandlers {
+	sendHandler: MessagerSendHandler;
+	handleLargeMessage?: (str: string, limit: number) => {
+		isLarge: boolean;
+		message: string;
+	};
+	decodeLargeMessage?: (base64: string) => string;
+}
 /**
  * 场景
  */
@@ -4674,25 +4871,30 @@ export type ITrackingLayer = {
 	editEnd: () => Vector3[] | Circle | Rectangle | Spline;
 	translateEntity: (entityId: string, from: Vector2, to: Vector2) => Promise<boolean>;
 };
-/** 发送消息实现接口 */
-export type MessagerSendHandler = (event: string) => void;
-export interface MessagerHandlers {
-	sendHandler: MessagerSendHandler;
-	handleLargeMessage?: (str: string, limit: number) => {
-		isLarge: boolean;
-		message: string;
-	};
-	decodeLargeMessage?: (base64: string) => string;
-}
+export type ITileCache = {
+	/**
+	 * 连接到本地缓存服务器
+	 * @param wsPort websocket端口
+	 * @param httpPort http端口
+	 */
+	connectToServer(wsPort: number, httpPort: number): void;
+	/**
+	 * 断开本地缓存服务器
+	 */
+	disconnectFromServer(): void;
+};
 export interface ServerOption {
 	/**
 	 * 是否开启右上角导航
 	 */
 	navigation: boolean;
 }
+export interface ClientOption {
+	clientPort?: number;
+}
 export declare function createClient(handlers: MessagerHandlers): Client;
 export type Client = typeof enums & {
-	init: (container?: string, option?: Partial<ServerOption>) => Promise<void>;
+	init: (container?: string, option?: Partial<ServerOption> & Partial<ClientOption>) => Promise<void>;
 	handleMessage: (messageStr: string) => void;
 	destroy: () => Promise<void>;
 	addListener: <key extends keyof SuperMap3DEvent>(event: key, listener: (param: SuperMap3DEvent[key]) => void) => void;
@@ -4704,8 +4906,10 @@ export interface ClientModule {
 		trackingLayer: AsyncFunction<ITrackingLayer>;
 		particleLayers: AsyncFunction<IParticleLayers>;
 		scanEffect: AsyncFunction<IScanEffect>;
+		primitiveLayers: AsyncFunction<IPrimitiveLayers>;
 	};
 	animation: AsyncFunction<IAnimation>;
+	mServer: AsyncFunction<IMServer>;
 	measure: AsyncFunction<IMeasure>;
 	analysis: AsyncFunction<IAnalysis>;
 	magnifier: AsyncFunction<IMagnifier>;
