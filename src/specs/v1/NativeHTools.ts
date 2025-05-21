@@ -82,6 +82,26 @@ export type DocumentSelectOptions = {
 }
 
 
+export type DocumentSaveOptions = {
+ 
+  /**
+   * 指定选择的文件或者目录路径（可选）。
+   * @default "file://docs/storage/Users/currentUser/test"
+   */
+  defaultFilePathUri?: string;
+  /**
+  *拉起documentPicker进行保存的文件名，若无此参数，则默认需要用户自行输入]
+   */
+  newFileNames?: string[];
+  
+  /**
+   * 保存文件的后缀类型
+   * @default []
+   */
+  fileSuffixChoices?: string[];
+
+}
+
 export interface Spec extends TurboModule {
 
   /**
@@ -93,8 +113,10 @@ export interface Spec extends TurboModule {
 
   openDoc(options?: DocumentSelectOptions): Promise<Array<string>>
 
-  readFile(path: string): Promise<string>
+  openDocSave(options?: DocumentSaveOptions): Promise<Array<string>>
 
+  readFile(path: string): Promise<string>
+  writeFile(filepath: string,value:string): Promise<boolean>
   copyDir(path: string, dest: string): Promise<boolean>
 }
 

@@ -2,12 +2,13 @@ import { TurboModule } from "@rnoh/react-native-openharmony";
 import { TM } from "@rnoh/react-native-openharmony/generated";
 
 import abilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
-import  { fileIo, picker } from '@kit.CoreFileKit';
+// import  { fileIo, picker } from '@kit.CoreFileKit';
 import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { buffer, util } from "@kit.ArkTS";
 import fileShare from '@ohos.fileshare';
-import { Environment, fileUri } from '@kit.CoreFileKit';
+import { Environment, fileUri, picker } from '@kit.CoreFileKit';
+import fs from '@ohos.file.fs';
 
 export class HTools extends TurboModule implements TM.RTNHTools.Spec {
 
@@ -58,7 +59,7 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
       }
       if (option?.mergeMode != undefined) {
         //开启聚合视图模式，支持拉起文件管理应用的聚合视图。默认为DEFAULT，表示该参数不生效，非聚合视图。当该参数置为非DEFAULT时，其他参数不生效。仅支持手机设备。
-        documentSelectOptions.mergeMode = option.mergeMode;
+        documentSelectOptions.mergeMode = option?.mergeMode;
       }
 
       let uris: Array<string> = [];
@@ -78,11 +79,45 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
     })
   }
 
+
+  async openDocSave(option?: picker.DocumentSaveOptions): Promise<Array<string>> {
+    return new Promise(resolve => {
+
+      const documentSaveOptions = new picker.DocumentSaveOptions();
+      if (option?.newFileNames) {
+        // 拉起documentPicker进行保存的文件名，若无此参数，则默认需要用户自行输入
+        documentSaveOptions.newFileNames = option.newFileNames;
+      }
+      if (option?.defaultFilePathUri) {
+        // 指定保存的文件或者目录路径
+        documentSaveOptions.defaultFilePathUri = option.defaultFilePathUri;
+      }
+      if (option?.fileSuffixChoices) {
+        // 保存文件的后缀类型
+        documentSaveOptions.fileSuffixChoices = option?.fileSuffixChoices;
+      }
+
+      let uris: Array<string> = [];
+      let context = getContext(this) as common.Context; // 请确保 getContext(this) 返回结果为 UIAbilityContext
+      // 创建文件选择器实例
+      const documentViewPicker = new picker.DocumentViewPicker(context);
+      documentViewPicker.save(documentSaveOptions).then((documentSaveResult: Array<string>) => {
+        //文件选择成功后，返回被选中文档的URI结果集。
+        uris = documentSaveResult;
+        console.info('documentViewPicker.select to file succeed and uris are:' + uris);
+
+        resolve(uris);
+      }).catch((err: BusinessError) => {
+        console.error(`Invoke documentViewPicker.select failed, code is ${err.code}, message is ${err.message}`);
+        resolve([]);
+      })
+    })
+  }
   async readFile(path: string): Promise<string> {
     return new Promise(resolve => {
       try {
         let helper = new util.Base64Helper()
-        let file = fileIo.openSync(path, fileIo.OpenMode.READ_ONLY);
+        let file = fs.openSync(path, fs.OpenMode.READ_ONLY);
         let bufferSize = 1024;
         let arrayBuffer = new ArrayBuffer(bufferSize);
 
@@ -96,7 +131,7 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
         let readLen: number = 0;
         do {
           // 读取文件内容到数组缓冲区
-          readLen = fileIo.readSync(file.fd, arrayBuffer, option);
+          readLen = fs.readSync(file.fd, arrayBuffer, option);
           if (readLen > 0) {
             let buffArr = new Uint8Array(arrayBuffer)
             content += helper.encodeToStringSync(buffArr)
@@ -106,10 +141,31 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
             option.offset += readLen;
           }
         } while (readLen === bufferSize);
-        fileIo.close(file);
+        fs.close(file);
         resolve(content);
       } catch (e) {
         resolve('');
+      }
+    });
+  }
+
+  async writeFile(filePath: string,value:string): Promise<boolean> {
+    return new Promise(resolve => {
+      try {
+        let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+        let str: string = value;
+        fs.write(file.fd, str).then((writeLen: number) => {
+          console.info("write data to file succeed and size is:" + writeLen);
+          resolve(true);
+        }).catch((err: BusinessError) => {
+          console.error("write data to file failed with error message: " + err.message + ", error code: " + err.code);
+          resolve(false);
+        }).finally(() => {
+          fs.closeSync(file);
+        });
+
+      } catch (e) {
+        resolve(false);
       }
     });
   }
