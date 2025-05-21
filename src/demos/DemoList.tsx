@@ -40,12 +40,16 @@ const DemoList = ({ navigation }: Props) => {
             path: 'DrawObject',
           },
           {
-            title: '文字',
+            title: '文本绘制',
             path: 'DrawText',
           },
           {
             title: '数据导入',
             path: 'DataImport',
+          },
+          {
+            title: '图层风格',
+            path: 'LayerStyle',
           },
         ],
       },
