@@ -107,6 +107,11 @@ export default function DataImport(props: Props) {
   useEffect(() => {
     // 1. 激活 sdk 许可
     initLicense()
+    return () => {
+      // 退出页面，关闭场景
+      Web3dUtils.getClient()?.scene.close()
+      Web3dUtils.setClient(null)
+    }
   }, [])
 
   useEffect(() => {
@@ -116,11 +121,6 @@ export default function DataImport(props: Props) {
       if (res) {
         setClientUrl(res)
       }
-    }
-    return () => {
-      // 退出页面，关闭场景
-      Web3dUtils.getClient()?.scene.close()
-      Web3dUtils.setClient(null)
     }
   }, [license])
 
