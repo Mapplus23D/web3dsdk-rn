@@ -170,33 +170,33 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
     });
   }
 
+
   async copyDir(path: string, dest: string): Promise<boolean> {
-    // try {
-    //   let policyInfo: fileShare.PolicyInfo = {
-    //     uri: path,
-    //     operationMode: fileShare.OperationMode.READ_MODE,
-    //   };
-    //   let policies: Array<fileShare.PolicyInfo> = [policyInfo];
-    //   fileShare.persistPermission(policies).then(() => {
-    //     console.info("persistPermission successfully");
-    //     fileIo.copyFileSync(path, dest)
-    //     return true;
-    //   }).catch((err: BusinessError<Array<fileShare.PolicyErrorResult>>) => {
-    //     console.error("persistPermission failed with error message: " + err.message + ", error code: " + err.code);
-    //     if (err.code == 13900001 && err.data) {
-    //       for (let i = 0; i < err.data.length; i++) {
-    //         console.error("error code : " + JSON.stringify(err.data[i].code));
-    //         console.error("error uri : " + JSON.stringify(err.data[i].uri));
-    //         console.error("error reason : " + JSON.stringify(err.data[i].message));
-    //       }
-    //     }
-    //   });
-    //   return false;
-    // } catch (error) {
-    //   let err: BusinessError = error as BusinessError;
-    //   console.error('persistPermission failed with err: ' + JSON.stringify(err));
-    //   return false;
-    // }
-    return false;
+
+    return new Promise(resolve => {
+      try {
+        let srcDirPathLocal: string = path;
+        let dstDirPathLocal: string = dest;
+
+        let srcDirUriLocal: string = path;
+        let dstDirUriLocal: string = dest;
+        if(srcDirUriLocal.indexOf('file:') == -1)
+          srcDirUriLocal = fileUri.getUriFromPath(srcDirPathLocal);
+        if(dstDirUriLocal.indexOf('file:') == -1)
+          dstDirUriLocal = fileUri.getUriFromPath(dstDirPathLocal);
+        fs.copy(srcDirUriLocal, dstDirUriLocal, (err: BusinessError) => {
+          if (err) {
+            console.error(`Failed to copy: ${JSON.stringify(err)}`);
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          console.info("Succeeded in copying. ");
+        })
+      } catch (e) {
+        resolve(false);
+      }
+    });
   }
+ 
 }
