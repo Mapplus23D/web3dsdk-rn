@@ -66,6 +66,10 @@ export default function DrawObject(props: Props) {
   useEffect(() => {
     // 激活 sdk 许可
     initLicense()
+    return () => {
+      // 退出页面，关闭场景
+      client?.scene.close()
+    }
   }, [])
 
   useEffect(() => {
@@ -75,10 +79,6 @@ export default function DrawObject(props: Props) {
       if (res) {
         setClientUrl(res)
       }
-    }
-    return () => {
-      // 退出页面，关闭场景
-      client?.scene.close()
     }
   }, [license])
 
@@ -246,7 +246,7 @@ export default function DrawObject(props: Props) {
       point: {
         color: 'rgba(0,126,235,1)',
         size: 10,
-        heightReference: client.HeightReference.RELATIVE_TO_GROUND,
+        heightReference: client.HeightReference.CLAMP_TO_GROUND,
       },
     });
     // 记录添加的对象的id
