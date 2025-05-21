@@ -12,6 +12,7 @@ export type DemoStackParamList = {
 
   DrawObject: undefined;
   DrawText: undefined;
+  DataImport: undefined;
 };
 
 export type DemoStackNavigationProps<

@@ -43,6 +43,10 @@ const DemoList = ({ navigation }: Props) => {
             title: '文字',
             path: 'DrawText',
           },
+          {
+            title: '数据导入',
+            path: 'DataImport',
+          },
         ],
       },
     ];

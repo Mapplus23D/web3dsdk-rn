@@ -58,7 +58,7 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
       }
       if (option?.mergeMode != undefined) {
         //开启聚合视图模式，支持拉起文件管理应用的聚合视图。默认为DEFAULT，表示该参数不生效，非聚合视图。当该参数置为非DEFAULT时，其他参数不生效。仅支持手机设备。
-        documentSelectOptions.mergeMode = picker.MergeTypeMode.DEFAULT;
+        documentSelectOptions.mergeMode = option.mergeMode;
       }
 
       let uris: Array<string> = [];
@@ -98,14 +98,15 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
           // 读取文件内容到数组缓冲区
           readLen = fileIo.readSync(file.fd, arrayBuffer, option);
           if (readLen > 0) {
-            // let buffArr = new Uint8Array(arrayBuffer)
-            // content += helper.encodeToStringSync(buffArr)
-            let buf = buffer.from(arrayBuffer, 0, readLen);
-            content += buf.toString();
+            let buffArr = new Uint8Array(arrayBuffer)
+            content += helper.encodeToStringSync(buffArr)
+            // let buf = buffer.from(arrayBuffer, 0, readLen);
+            // content += buf.toString();
             // 更新下一次读取的偏移量，继续从文件后续位置读取
             option.offset += readLen;
           }
         } while (readLen === bufferSize);
+        fileIo.close(file);
         resolve(content);
       } catch (e) {
         resolve('');
