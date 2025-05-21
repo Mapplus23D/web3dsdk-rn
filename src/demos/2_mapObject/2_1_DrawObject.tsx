@@ -4,7 +4,7 @@
 import { Circle, Client, Entity, Vector3 } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { icon_aim_point, icon_circle_region, icon_line_black, icon_line_curve_black, icon_line_dashed, icon_point_black, icon_region_black } from '../../assets';
+import { icon_aim_point, icon_circle_region, icon_line_black, icon_line_curve_black, icon_line_dashed, icon_pic, icon_point_black, icon_region_black } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
 import { RTNWebMap3D } from '../../specs';
@@ -28,6 +28,8 @@ enum DrawType {
   Region,
   /** 圆 */
   Circle,
+  /**  图片 */
+  Image,
 }
 
 export default function DrawObject(props: Props) {
@@ -253,6 +255,35 @@ export default function DrawObject(props: Props) {
     history.current.push({ layer: PointLayer, id })
   }
 
+  /**
+   * 向 `point` 图层添加一个图片
+   */
+  async function addImage() {
+    if (!client) return;
+
+    // 获取点位置
+    const position = await getDrawPosition()
+    if (!position) return
+
+    // 向 point 图层添加一个点
+    // 参数包含点的位置及样式风格
+    const id = await client.scene.addEntity(PointLayer, {
+      //点位置
+      position: position,
+      billboard: {
+        image: `${resourceBase}/resource/symbol/image/起点.png`,
+        verticalOrigin: client.VerticalOrigin.baseline,
+        width: 20,
+        height: 20,
+        disableDepthTestDistance: 50000000000,
+        distanceDisplayCondition: { near: 0, far: 50000000000 },
+        heightReference: 1,
+      },
+    });
+    // 记录添加的对象的id
+    history.current.push({ layer: PointLayer, id })
+  }
+
   /** 在跟踪层上绘制线/面过程画点 */
   const drawPoint = async () => {
     const llPoint = await getDrawPosition()
@@ -415,6 +446,9 @@ export default function DrawObject(props: Props) {
       case DrawType.Point:
         addPoint()
         break
+      case DrawType.Image:
+        addImage()
+        break
       case DrawType.Line:
       case DrawType.DashLine:
       case DrawType.Spline:
@@ -446,6 +480,13 @@ export default function DrawObject(props: Props) {
             width: '30%',
             marginLeft: 10,
           }}>
+          <TouchableOpacity
+            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Image ? '#4680DF' : '#fff' }]}
+            activeOpacity={0.8}
+            onPress={() => setDrawType(type => type === DrawType.Image ? DrawType.Null : DrawType.Image)}
+          >
+            <Image source={icon_pic} style={styles.methodBtnImg} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={[styles.methodBtn, { backgroundColor: drawType === DrawType.Point ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
