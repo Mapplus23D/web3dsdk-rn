@@ -4877,7 +4877,7 @@ export type ITileCache = {
 	 * @param wsPort websocket端口
 	 * @param httpPort http端口
 	 */
-	connectToServer(wsPort: number, httpPort: number): void;
+	connectToServer(wsPort: number | undefined, httpPort: number): void;
 	/**
 	 * 断开本地缓存服务器
 	 */
