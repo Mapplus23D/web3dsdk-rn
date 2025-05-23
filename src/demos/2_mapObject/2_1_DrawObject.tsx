@@ -1,7 +1,7 @@
 /**
  * 几何图形绘制Demo
  */
-import { Circle, Client, Entity, Vector3 } from 'client/webmap3d-client';
+import { Circle, Client, Primitive, Vector3 } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { icon_aim_point, icon_circle_region, icon_line_black, icon_line_curve_black, icon_line_dashed, icon_pic, icon_point_black, icon_region_black } from '../../assets';
@@ -9,7 +9,7 @@ import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
 import { RTNWebMap3D } from '../../specs';
 import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
-import { LicenseUtil } from '../../utils';
+import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawObject'> { }
 
@@ -34,6 +34,7 @@ enum DrawType {
 
 export default function DrawObject(props: Props) {
   const PointLayer = 'point'
+  const ImageLayer = 'image'
   const LineLayer = 'line'
   const DashLine = 'dashline'
   const SplineLayer = 'spline'
@@ -116,9 +117,15 @@ export default function DrawObject(props: Props) {
    * 实现与 `openInitMap()` 一样的效果
    */
   async function prepareInitMap() {
-    await flyToInitPosition();
-    await addImageLayer();
-    await setTerrainLayer();
+    // 默认添加底图
+    LayerUtil.addImageLayer(LayerUtil.BaseLayers.TIAN_MAP)
+    // 默认添加图网
+    LayerUtil.addRoadLayer(LayerUtil.RoadLayers.ROAD)
+    // 默认添加地形
+    LayerUtil.addTerrainLayer(LayerUtil.TerrainLayers.TERRAIN_STK)
+
+    flyToInitPosition()
+
     await addDefaultLayer();
   }
 
@@ -129,11 +136,11 @@ export default function DrawObject(props: Props) {
     if (!client) return;
     await client.scene.camera.flyTo({
       //经度
-      longitude: 101.64439721507041,
+      longitude: 104.09182,
       //维度
-      latitude: 29.08165789172511,
+      latitude: 30.52147,
       //高度
-      altitude: 5999049.208713511,
+      altitude: 1000,
       //正北方向角度
       heading: 0,
       //俯仰角度
@@ -143,34 +150,96 @@ export default function DrawObject(props: Props) {
     });
   }
 
-  /**
-   * 向当前地图中添加一个影像底图
-   */
-  async function addImageLayer() {
-    if (!client) return;
-
-    return client.scene.addImagelayer('image 1', {
-      type: client.ProviderType.BING,
-      url: 'https://dev.virtualearth.net',
-      mapStyle: client.BingMapsStyle.AERIAL,
-      key: 'AgYCj_VzN0MWJ-4pgJj3I7bZym9kmbb-HDWjG5cgHFJxNOokbRcSEtUwJM3uWweh',
-    });
+  /** 添加点图层 */
+  const addDefaultPointLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(PointLayer, {
+        type: client.PrimitiveType.SolidPoint,
+        /** 大小pixelSize */
+        size: 10,
+        /** 填充颜色 */
+        color: 'rgba(255, 0, 0, 1)',
+        /** 遮挡深度 */
+        disableDepthTestDistance: 10000000000,
+        /** 随距离缩放参数，默认undefine表示不随距离缩放 */
+        scaleByDistance: {
+          near: 5000,
+          nearValue: 1,
+          far: 500000000,
+          farValue: 1,
+        },
+        /** 相对地形的位置 */
+        heightReference: client.HeightReference.CLAMP_TO_GROUND,
+      })
+    }
+    return false
   }
 
-  /**
-   * 设置当前底图的地形
-   */
-  async function setTerrainLayer() {
-    if (!client) return;
+  /** 添加图片图层 */
+  const addDefaultImageLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(ImageLayer, {
+        type: client.PrimitiveType.Billboard,
+        /** 大小pixelSize */
+        image: `${resourceBase}/resource/symbol/image/起点.png`,
+        /** 遮挡深度 */
+        disableDepthTestDistance: 10000000000,
+        /** 图片高，单位px */
+        height: 20,
+        /** 图片宽，单位px */
+        width: 20,
+        /** 相对地形的位置 */
+        heightReference: client.HeightReference.CLAMP_TO_GROUND,
+      })
+    }
+    return false
+  }
 
-    client.scene.openTerrainLayer('terrain', {
-      type: client.ProviderType.SUPERMAP,
-      url: 'https://www.supermapol.com/realspace/services/3D-stk_terrain/rest/realspace/datas/info/data/path',
-      invisibility: true,
-      requestWaterMask: true,
-      requestVertexNormals: true,
-      isSct: false,
-    });
+  /** 添加线图层 */
+  const addDefaultLineLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(LineLayer, {
+        type: client.PrimitiveType.SolidLine,
+        color: 'rgba(0, 100, 255, 1)',
+        width: 2,
+        /** 贴地方式 */
+        classificationType: client.ClassificationType.BOTH,
+      })
+    }
+    return false
+  }
+
+  /** 添加线图层 */
+  const addDefaultDashLineLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(DashLine, {
+        type: client.PrimitiveType.DashedLine,
+        color: 'rgba(0, 100, 255, 1)',
+        width: 2,
+        /** 贴地方式 */
+        classificationType: client.ClassificationType.BOTH,
+      })
+    }
+    return false
+  }
+
+  /** 添加面图层 */
+  const addDefaultRegionLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(RegionLayer, {
+        type: client.PrimitiveType.SolidRegion,
+        /** 填充颜色 */
+        color: 'rgba(0, 100, 255, 0.5)',
+        /** 贴地方式 */
+        classificationType: client.ClassificationType.BOTH,
+      })
+    }
+    return false
   }
 
   /**
@@ -179,18 +248,12 @@ export default function DrawObject(props: Props) {
   async function addDefaultLayer() {
     if (!client) return;
 
-    // 添加一个名为 `point` 的图层，存放点对象
-    await client.scene.addEntitiesLayer(PointLayer);
-    // 添加一个名为 `line` 的图层，存放线对象
-    await client.scene.addEntitiesLayer(LineLayer);
-    // 添加一个名为 `dashline` 的图层，存放虚线对象
-    await client.scene.addEntitiesLayer(DashLine);
-    // 添加一个名为 `spline` 的图层，存放曲线对象
-    await client.scene.addEntitiesLayer(SplineLayer);
-    // 添加一个名为 `region` 的图层，存放面对象
-    await client.scene.addEntitiesLayer(RegionLayer);
-    // 添加一个名为 `circle` 的图层，存放圆对象
-    await client.scene.addEntitiesLayer(CircleLayer);
+    // 添加默认图层
+    await addDefaultPointLayer()
+    await addDefaultImageLayer()
+    await addDefaultLineLayer()
+    await addDefaultDashLineLayer()
+    await addDefaultRegionLayer()
   }
 
   const getDrawPosition = async (): Promise<Vector3 | null> => {
@@ -240,19 +303,11 @@ export default function DrawObject(props: Props) {
     const position = await getDrawPosition()
     if (!position) return
 
-    // 向 point 图层添加一个点
-    // 参数包含点的位置及样式风格
-    const id = await client.scene.addEntity(PointLayer, {
-      //点位置
+    const id = await client.scene.primitiveLayers.layerAddPrimitive(PointLayer, {
       position: position,
-      point: {
-        color: 'rgba(0,126,235,1)',
-        size: 10,
-        heightReference: client.HeightReference.CLAMP_TO_GROUND,
-      },
-    });
+    })
     // 记录添加的对象的id
-    history.current.push({ layer: PointLayer, id })
+    id && history.current.push({ layer: PointLayer, id })
   }
 
   /**
@@ -265,23 +320,11 @@ export default function DrawObject(props: Props) {
     const position = await getDrawPosition()
     if (!position) return
 
-    // 向 point 图层添加一个点
-    // 参数包含点的位置及样式风格
-    const id = await client.scene.addEntity(PointLayer, {
-      //点位置
+    const id = await client.scene.primitiveLayers.layerAddPrimitive(ImageLayer, {
       position: position,
-      billboard: {
-        image: `${resourceBase}/resource/symbol/image/起点.png`,
-        verticalOrigin: client.VerticalOrigin.baseline,
-        width: 20,
-        height: 20,
-        disableDepthTestDistance: 50000000000,
-        distanceDisplayCondition: { near: 0, far: 50000000000 },
-        heightReference: 1,
-      },
-    });
+    })
     // 记录添加的对象的id
-    history.current.push({ layer: PointLayer, id })
+    id && history.current.push({ layer: ImageLayer, id })
   }
 
   /** 在跟踪层上绘制线/面过程画点 */
@@ -333,98 +376,43 @@ export default function DrawObject(props: Props) {
     }
     let layerName = ''
     const points = await client.scene.trackingLayer.editEnd()
-    let _entity: Entity | null = null
+    let _primitive: Partial<Primitive> | null = null
     switch (drawType) {
       case DrawType.Line:
+      case DrawType.Spline:
         layerName = LineLayer
-        _entity = {
-          polyline: {
-            positions: points,
-            // 线型为实线
-            lineType: client.LineType.solid,
-            // 贴地模式，这里设置为贴地
-            classificationType: client.ClassificationType.BOTH,
-            // 实线材质颜色
-            material: 'rgba(0,235,235,.6)',
-          },
+        _primitive = {
+          positions: points,
         }
         break
       case DrawType.DashLine:
         layerName = DashLine
-        _entity = {
-          polyline: {
-            positions: points,
-            width: 6,
-            // 线型为实线
-            lineType: client.LineType.dashed,
-            // 贴地模式，这里设置为贴地
-            classificationType: client.ClassificationType.BOTH,
-            // 实线材质颜色
-            material: {
-              /** 前景色 */
-              color: 'rgba(0,235,235,.6)',
-              /** 背景色 */
-              gapColor: 'rgba(250, 28, 28, 0.6)',
-              /** 间隔 */
-              dashLength: 10,
-            },
-          },
-        }
-        break
-      case DrawType.Spline:
-        layerName = SplineLayer
-        _entity = {
-          polyline: {
-            positions: points,
-            width: 6,
-            // 线型为实线
-            lineType: client.LineType.solid,
-            // 贴地模式，这里设置为贴地
-            classificationType: client.ClassificationType.BOTH,
-            // 实线材质颜色
-            material: 'rgba(0,235,235,.6)',
-          },
+        _primitive = {
+          positions: points,
         }
         break
       case DrawType.Region:
-        layerName = LineLayer
-        _entity = {
-          polygon: {
-            hierarchy: {
-              //面的点串，按顺序分别为 [经度，纬度，高度，经度，纬度，高度，... ]
-              positions: points as Vector3[],
-            },
-            // 贴地模式，这里设置为贴地
-            classificationType: client.ClassificationType.BOTH,
-            // 面的填充模式，设置为纯色填充
-            fillType: client.FillType.solid,
-            // 设置填充颜色
-            material: 'rgba(245,158,52,.6)',
+        layerName = RegionLayer
+        _primitive = {
+          hierarchy: {
+            positions: points as Vector3[],
           },
         }
         break
       case DrawType.Circle:
-        layerName = CircleLayer
-        _entity = {
-          polygon: {
-            hierarchy: points as Circle,
-            // 贴地模式，这里设置为贴地
-            classificationType: client.ClassificationType.BOTH,
-            // 面的填充模式，设置为纯色填充
-            fillType: client.FillType.solid,
-            // 设置填充颜色
-            material: 'rgba(245,158,52,.6)',
-          },
+        layerName = RegionLayer
+        _primitive = {
+          hierarchy: points as Circle,
         }
         break
     }
-    if (!layerName || !_entity) return
+    if (!layerName || !_primitive) return
     editPoints.current = []
     // 添加对象
-    const entityId = await client.scene.addEntity(layerName, _entity)
+    const entityId = await client.scene.primitiveLayers.layerAddPrimitive(layerName, _primitive as any)
 
     // 记录添加的对象的id
-    history.current.push({ layer: layerName, id: entityId })
+    entityId && history.current.push({ layer: layerName, id: entityId })
 
     // 清除绘制虚线对象
     await client.scene.trackingLayer.removeAll()
@@ -435,7 +423,7 @@ export default function DrawObject(props: Props) {
   const _undo = async () => {
     const _h = history.current.pop()
     if (_h) {
-      return await client?.scene.removeEntity(_h.layer, _h.id)
+      return await client?.scene.primitiveLayers.layerRemovePrimitive(_h.layer, _h.id)
     }
     return false
   }
@@ -587,8 +575,8 @@ export default function DrawObject(props: Props) {
     <Webmap3DView
       clientUrl={clientUrl}
       onInited={client => {
-        console.log('inited');
         setClient(client);
+        Web3dUtils.setClient(client)
       }}
       navigation={props.navigation}
     >
