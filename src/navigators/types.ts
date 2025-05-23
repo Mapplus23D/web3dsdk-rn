@@ -14,6 +14,7 @@ export type DemoStackParamList = {
   DrawText: undefined;
   DataImport: undefined;
   LayerStyle: undefined;
+  ObjectEdit: undefined;
 };
 
 export type DemoStackNavigationProps<
