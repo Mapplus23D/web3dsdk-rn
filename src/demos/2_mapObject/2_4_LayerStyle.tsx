@@ -702,7 +702,7 @@ export default function LayerStyle(props: Props) {
    * 侧边工具栏
    * @returns 
    */
-  const renderTypes = () => {
+  const renderTools = () => {
     return (
       <View
         style={{
@@ -762,7 +762,7 @@ export default function LayerStyle(props: Props) {
       onInited={_onLoad}
       navigation={props.navigation}
     >
-      {renderTypes()}
+      {renderTools()}
       {renderStyleView()}
     </Webmap3DView>
   )

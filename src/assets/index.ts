@@ -15,6 +15,8 @@ const icon_region_grid = require('./icon_region_grid.png')
 const icon_region_solid = require('./icon_region_solid.png')
 const icon_region_stripe = require('./icon_region_stripe.png')
 const icon_circle_region = require('./icon_circle_region.png')
+const icon_label_terlabel = require('./icon_label_terlabel.png')
+const icon_label = require('./icon_label.png')
 
 const icon_pic = require('./icon_pic.png')
 const icon_import = require('./icon_import.png')
@@ -51,6 +53,8 @@ export {
   icon_region_grid,
   icon_region_solid,
   icon_region_stripe,
+  icon_label_terlabel,
+  icon_label,
 
   icon_pic,
   icon_import,

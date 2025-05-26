@@ -2,10 +2,10 @@
  * 文本绘制Demo
  */
 import Geolocation from '@react-native-oh-tpl/geolocation';
-import { Client, Primitive } from 'client/webmap3d-client';
+import { Client, Entity } from 'client/webmap3d-client';
 import { useEffect, useRef, useState } from 'react';
 import { Image, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { icon_aim_point, icon_label, icon_label_terlabel } from '../../assets';
+import { icon_aim_point } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { EntityStyle } from '../../constValues';
 import { DemoStackPageProps } from '../../navigators/types';
@@ -15,26 +15,18 @@ import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawText'> { }
 
-const LABEL_LAYER = 'label_layer'
-const TERRAIN_LABEL_LAYER = 'tarrain_label_layer'
-
-enum DrawType {
-  LABEL = 'label',
-  TERRAIN_LABEL = 'terrain_label',
-}
+const DEFAULT_LAYER = 'default_layer'
 
 export default function DrawText(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
   const [clientUrl, setClientUrl] = useState<string | undefined>()
 
-  const [drawType, setDrawType] = useState<DrawType>(DrawType.LABEL)
-
   /** 文本 */
   const textRef = useRef('')
   /** 记录文本ID */
-  const textHistory = useRef<{ layer: string, id: string }[]>([])
+  const textHistory = useRef<string[]>([])
   /** 当前绘制对象 */
-  const entity = useRef<Primitive>()
+  const entity = useRef<Entity>({})
 
   /** 准星图标句柄 用于获取屏幕坐标 */
   const aimPointImageRef = useRef<Image>(null)
@@ -55,54 +47,11 @@ export default function DrawText(props: Props) {
     // 默认添加地形
     LayerUtil.addTerrainLayer(LayerUtil.TerrainLayers.TERRAIN_STK)
 
-    initLabelLayer()
-    initTerrainLabelLayer()
-  }
-
-  /**
-   * 初始化文字图层
-   */
-  const initLabelLayer = () => {
     // 添加文本图层
     const client = Web3dUtils.getClient()
     const scene = client?.scene
     if (scene) {
-      scene.primitiveLayers.addPrimitiveLayer(LABEL_LAYER, {
-        type: client.PrimitiveType.Label,
-        font: '12px sans-serif',
-        /** 遮挡深度 */
-        disableDepthTestDistance: 10000000000,
-        /** 随距离缩放参数，默认undefine表示不随距离缩放 */
-        scaleByDistance: {
-          near: 5000,
-          nearValue: 1,
-          far: 500000000,
-          farValue: 1,
-        },
-        /** 相对地形的位置 */
-        heightReference: client.HeightReference.CLAMP_TO_GROUND,
-      })
-    }
-  }
-
-  /**
-   * 初始化贴地文字图层
-   */
-  const initTerrainLabelLayer = () => {
-    // 添加贴地文本图层
-    const client = Web3dUtils.getClient()
-    const scene = client?.scene
-    if (scene) {
-      scene.primitiveLayers.addPrimitiveLayer(TERRAIN_LABEL_LAYER, {
-        type: client.PrimitiveType.TerrainLabel,
-        font: '32px sans-serif',
-        style: client.LabelStyle.FILL,
-        fillColor: EntityStyle.label.color,
-        showBackground: true,
-        backgroundColor: EntityStyle.label.backgroundColor,
-        outlineColor: EntityStyle.label.outlineColor,
-        scale: 6,
-      })
+      scene.addEntitiesLayer(DEFAULT_LAYER)
     }
   }
 
@@ -127,6 +76,7 @@ export default function DrawText(props: Props) {
   }, [license])
 
   const _onLoad = (client: Client) => {
+    console.log('inited');
     Web3dUtils.setClient(client);
     initLayers()
     _locate()
@@ -150,10 +100,6 @@ export default function DrawText(props: Props) {
     })
   }
 
-  const _onChangeDrawType = (type: DrawType) => {
-    setDrawType(type)
-  }
-
   const _drawText = () => {
     const client = Web3dUtils.getClient()
     const scene = client?.scene
@@ -169,36 +115,25 @@ export default function DrawText(props: Props) {
       }, false)
       if (!tempPoint) return
 
-      let layerName = LABEL_LAYER
-      if (drawType === DrawType.TERRAIN_LABEL) {
-        layerName = TERRAIN_LABEL_LAYER
-        // 添加贴地文本
-        entity.current = {
-          type: client.PrimitiveType.TerrainLabel,
-          text: textRef.current,
-          position: tempPoint,
-        }
-      } else {
-        // 设置文本样式
-        entity.current = {
-          type: client.PrimitiveType.Label,
-          text: textRef.current,
-          position: tempPoint,
-          verticalOrigin: client.VerticalOrigin.bottom,
-          font: EntityStyle.label.fontSize + 'px sans-serif',
-          fillColor: EntityStyle.label.color,
-          disableDepthTestDistance: 50000000000,
-          horizontalOrigin: client.HorizontalOrigin.center,
-          heightReference: client.HeightReference.CLAMP_TO_GROUND,
-        }
-
+      // 设置文本样式
+      entity.current.label = {
+        text: textRef.current,
+        verticalOrigin: client.VerticalOrigin.bottom,
+        font: EntityStyle.label.fontSize + 'px sans-serif',
+        fillColor: EntityStyle.label.color,
+        disableDepthTestDistance: 50000000000,
+        horizontalOrigin: client.HorizontalOrigin.center,
+        heightReference: client.HeightReference.CLAMP_TO_GROUND,
       }
+      entity.current.point = {
+        size: 0,
+        show: false,
+      }
+      // 设置文本位置
+      entity.current.position = tempPoint
       // 添加文本
-      const entityId = await scene?.primitiveLayers.layerAddPrimitive(layerName, entity.current)
-      entityId && textHistory.current.push({
-        layer: layerName,
-        id: entityId,
-      })
+      const entityId = await scene?.addEntity(DEFAULT_LAYER, entity.current)
+      textHistory.current.push(entityId)
     })
   }
 
@@ -207,12 +142,11 @@ export default function DrawText(props: Props) {
     const client = Web3dUtils.getClient()
     const scene = client?.scene
     if (!scene) return
-    const entity = textHistory.current.pop()
-    if (!entity) return
-    entity && await scene.primitiveLayers.layerRemovePrimitive(entity.layer, entity.id)
+    const entityId = textHistory.current.pop()
+    if (!entityId) return
+    const result = entity && await scene.removeEntity(DEFAULT_LAYER, entityId)
   }
 
-  /** 准星 */
   const _renderAim = () => {
     return (
       <View
@@ -240,7 +174,6 @@ export default function DrawText(props: Props) {
     )
   }
 
-  /** 输入框组件 */
   const _renderTextBar = () => {
     return (
       <KeyboardAvoidingView behavior={'position'} keyboardVerticalOffset={36}>
@@ -263,48 +196,6 @@ export default function DrawText(props: Props) {
     )
   }
 
-  /**
-   * 侧边工具栏
-   * @returns 
-   */
-  const _renderTools = () => {
-    return (
-      <View
-        style={{
-          position: 'absolute',
-          top: 60,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        }}
-      >
-        <View
-          style={{
-            width: '30%',
-            marginLeft: 10,
-          }}>
-          <TouchableOpacity
-            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.LABEL ? '#4680DF' : '#fff' }]}
-            activeOpacity={0.8}
-            onPress={() => _onChangeDrawType(DrawType.LABEL)}
-          >
-            <Image source={icon_label} style={styles.methodBtnImg} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.methodBtn, { backgroundColor: drawType === DrawType.TERRAIN_LABEL ? '#4680DF' : '#fff' }]}
-            activeOpacity={0.8}
-            onPress={() => _onChangeDrawType(DrawType.TERRAIN_LABEL)}
-          >
-            <Image source={icon_label_terlabel} style={styles.methodBtnImg} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    )
-  }
-
   if (!license || !clientUrl) return
 
   return (
@@ -313,7 +204,6 @@ export default function DrawText(props: Props) {
       onInited={_onLoad}
       navigation={props.navigation}
     >
-      {_renderTools()}
       {_renderAim()}
       {_renderTextBar()}
     </Webmap3DView>
@@ -354,19 +244,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     borderRadius: 4,
     paddingHorizontal: 10,
-  },
-  methodBtn: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 40,
-    width: 40,
-    borderRadius: 4,
-    backgroundColor: '#fff',
-    marginTop: 20
-  },
-  methodBtnImg: {
-    height: 30,
-    width: 30,
-  },
+  }
 });
