@@ -1,8 +1,8 @@
 /**
  * 图层风格Demo
  */
-import { Client, FillType, LineType } from 'client/webmap3d-client';
-import { useEffect, useMemo, useState } from 'react';
+import { Client, PrimitiveBillboard, PrimitiveSolidPoint, PrimitiveUniform } from 'client/webmap3d-client';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ImageRequireSource, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { icon_line_arrow, icon_line_black, icon_line_contour, icon_line_dashed, icon_line_solid, icon_pic, icon_point_black, icon_region_black, icon_region_grid, icon_region_solid, icon_region_stripe } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
@@ -14,10 +14,11 @@ import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 interface Props extends DemoStackPageProps<'LayerStyle'> { }
 
 const PointLayer = 'point'
+const ImageLayer = 'image'
 const LineLayer = 'line'
 const RegionLayer = 'region'
 
-interface SelectData { entityId: string, layerName: string, type?: number }
+interface SelectData { entityId: string, layerName: string, type: number }
 
 export default function LayerStyle(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
@@ -29,6 +30,7 @@ export default function LayerStyle(props: Props) {
   const [point, setPont] = useState<SelectData>();
   const [line, setLine] = useState<SelectData>();
   const [region, setRegion] = useState<SelectData>();
+  const styleRef = useRef<PrimitiveUniform>()
 
 
   /** 激活许可 */
@@ -42,6 +44,85 @@ export default function LayerStyle(props: Props) {
     const base = RTNWebMap3D?.getResourceBase()
     return base || ''
   }, [])
+
+
+
+  /** 添加点图层 */
+  const addDefaultPointLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(PointLayer, {
+        type: client.PrimitiveType.SolidPoint,
+        /** 大小pixelSize */
+        size: 10,
+        /** 填充颜色 */
+        color: 'rgba(255, 0, 0, 1)',
+        /** 遮挡深度 */
+        disableDepthTestDistance: 10000000000,
+        /** 随距离缩放参数，默认undefine表示不随距离缩放 */
+        scaleByDistance: {
+          near: 5000,
+          nearValue: 1,
+          far: 500000000,
+          farValue: 1,
+        },
+        /** 相对地形的位置 */
+        heightReference: client.HeightReference.CLAMP_TO_GROUND,
+      })
+    }
+    return false
+  }
+
+  /** 添加图片图层 */
+  const addDefaultImageLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(ImageLayer, {
+        type: client.PrimitiveType.Billboard,
+        /** 大小pixelSize */
+        image: `${resourceBase}/resource/symbol/image/起点.png`,
+        /** 遮挡深度 */
+        disableDepthTestDistance: 10000000000,
+        /** 图片高，单位px */
+        height: 20,
+        /** 图片宽，单位px */
+        width: 20,
+        /** 相对地形的位置 */
+        heightReference: client.HeightReference.CLAMP_TO_GROUND,
+      })
+    }
+    return false
+  }
+
+  /** 添加线图层 */
+  const addDefaultLineLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(LineLayer, {
+        type: client.PrimitiveType.SolidLine,
+        color: 'rgba(0, 100, 255, 1)',
+        width: 2,
+        /** 贴地方式 */
+        classificationType: client.ClassificationType.BOTH,
+      })
+    }
+    return false
+  }
+
+  /** 添加面图层 */
+  const addDefaultRegionLayer = async () => {
+    const client = Web3dUtils.getClient()
+    if (client?.scene) {
+      return await client.scene.primitiveLayers.addPrimitiveLayer(RegionLayer, {
+        type: client.PrimitiveType.SolidRegion,
+        /** 填充颜色 */
+        color: 'rgba(0, 100, 255, 0.5)',
+        /** 贴地方式 */
+        classificationType: client.ClassificationType.BOTH,
+      })
+    }
+    return false
+  }
 
   /** 初始化默认图层 */
   const initLayers = async () => {
@@ -58,17 +139,32 @@ export default function LayerStyle(props: Props) {
     // 默认添加地形
     LayerUtil.addTerrainLayer(LayerUtil.TerrainLayers.TERRAIN_STK)
 
-    // 添加一个名为 `point` 的图层，存放点对象
-    await client.scene.addEntitiesLayer(PointLayer);
-    // 添加一个名为 `line` 的图层，存放线对象
-    await client.scene.addEntitiesLayer(LineLayer);
-    // 添加一个名为 `region` 的图层，存放面对象
-    await client.scene.addEntitiesLayer(RegionLayer);
+    await addDefaultPointLayer()
+    await addDefaultImageLayer()
+    await addDefaultLineLayer()
+    await addDefaultRegionLayer()
 
-    // 添加点、线、面对象
+    // // 添加一个名为 `point` 的图层，存放点对象
+    // await client.scene.addEntitiesLayer(PointLayer);
+    // // 添加一个名为 `line` 的图层，存放线对象
+    // await client.scene.addEntitiesLayer(LineLayer);
+    // // 添加一个名为 `region` 的图层，存放面对象
+    // await client.scene.addEntitiesLayer(RegionLayer);
+
+    // 添加点、线、面、图片对象
     addPoint()
+    addImage()
     addLine()
     addRegion()
+
+    client.scene.camera.flyTo({
+      longitude: 104.09182,
+      latitude: 30.52147,
+      altitude: 1000,
+      heading: 0,
+      pitch: -90,
+      roll: 0
+    })
   }
 
   useEffect(() => {
@@ -91,126 +187,122 @@ export default function LayerStyle(props: Props) {
     }
   }, [license])
 
+  useEffect(() => {
+    if (selectData?.layerName) {
+
+    }
+  }, [selectData])
+
   const _onLoad = (client: Client) => {
     Web3dUtils.setClient(client);
     initLayers()
   }
 
+  const onChangeMethod = (data?: SelectData) => {
+    setSelectData(item => {
+      if (!data || item?.type === data.type) {
+        styleRef.current = undefined
+        return undefined
+      } else {
+        Web3dUtils.getClient()?.scene.primitiveLayers.getLayerPrimitiveUniform(data.layerName).then(style => {
+          styleRef.current = style
+        })
+        return data
+      }
+    })
+  }
   /**
-   * 添加点和图片
+   * 添加点
    */
-  async function addPoint() {
+  const addPoint = async () => {
     const client = Web3dUtils.getClient();
     if (!client) return;
 
     // 向 point 图层添加一个点
     // 参数包含点的位置及样式风格
-    const id = await client.scene.addEntity(PointLayer, {
+    const id = await client.scene.primitiveLayers.layerAddPrimitive(PointLayer, {
       //点位置
       position: {
-        x: 101,  // 经度
-        y: 20,   // 纬度
-        z: 1000, // 高度
+        x: 104.09197291173261,  // 经度
+        y: 30.522202566573696,   // 纬度
+        z: 452.210838550299, // 高度
       },
-      point: {
-        color: 'red',
-        size: 20,
-        heightReference: client.HeightReference.RELATIVE_TO_GROUND,
-      },
-    });
-
-    setPont({
-      entityId: id,
-      layerName: PointLayer,
     })
 
+    id && setPont({
+      entityId: id,
+      layerName: PointLayer,
+      type: client.PrimitiveType.SolidPoint,
+    })
+  }
+
+  /**
+   * 添加图片
+   */
+  const addImage = async () => {
+    const client = Web3dUtils.getClient();
+    if (!client) return;
+
     // 若添加了资源包，可在这里使用资源中的图片添加一个billboard
-    const imageId = await client.scene.addEntity(PointLayer, {
+    const imageId = await client.scene.primitiveLayers.layerAddPrimitive(ImageLayer, {
       //点位置
       position: {
-        x: 102,  // 经度
-        y: 24,   // 纬度
-        z: 1000, // 高度
+        x: 104.09189452473518,  // 经度
+        y: 30.52125513242423,   // 纬度
+        z: 452.210838550299, // 高度
       },
-      point: undefined,
-      billboard: {
-        image: `${resourceBase}/resource/symbol/image/ATM.png`,
-        verticalOrigin: client.VerticalOrigin.baseline,
-        width: 20,
-        height: 20,
-        disableDepthTestDistance: 50000000000,
-        distanceDisplayCondition: { near: 0, far: 50000000000 },
-        heightReference: 1,
-      },
-    });
-    setImg({
+    })
+    imageId && setImg({
       entityId: imageId,
-      layerName: PointLayer,
+      layerName: ImageLayer,
+      type: client.PrimitiveType.Billboard,
     })
   }
 
   /**
    * 添加线
    */
-  async function addLine() {
+  const addLine = async () => {
     const client = Web3dUtils.getClient();
     if (!client) return;
 
-    const id = await client.scene.addEntity(LineLayer, {
-      polyline: {
-        // 线的点串，按顺序分别为 [经度，纬度，高度，经度，纬度，高度，... ]
-        positions: [
-          84.64916879660377, 35.41425337598116, 2441.297051018675,
-          94.29962737072826, 29.596452697455458, 3065.81650786256,
-          109.86745231651254, 28.211645501645858, -1144.7837444679474,
-          115.84428055333031, 35.56131945681637, -2512.2334337425114,
-          121.03421361482295, 37.09584519266494, -2044.060080551752,
-        ],
-        // 线型为实线
-        lineType: client.LineType.solid,
-        // 实线材质颜色
-        material: 'red',
-        // 贴地方式
-        classificationType: client.ClassificationType.BOTH,
-      },
+    const id = await client.scene.primitiveLayers.layerAddPrimitive(LineLayer, {
+      // 线的点串，按顺序分别为 [经度，纬度，高度，经度，纬度，高度，... ]
+      positions: [
+        104.08859448400918, 30.520262722685803, 450.63432308779284,
+        104.09134848951884, 30.521003289516923, 451.9439052094984,
+        104.09306035594514, 30.52094314089782, 452.72108470829755,
+      ],
     });
-    setLine({
+    id && setLine({
       entityId: id,
       layerName: LineLayer,
-      type: client.LineType.solid,
+      type: client.PrimitiveType.SolidLine,
     })
   }
 
   /**
    * 添加面
    */
-  async function addRegion() {
+  const addRegion = async () => {
     const client = Web3dUtils.getClient();
     if (!client) return;
 
-    const id = await client.scene.addEntity(RegionLayer, {
-      polygon: {
-        hierarchy: {
-          //面的点串，按顺序分别为 [经度，纬度，高度，经度，纬度，高度，... ]
-          positions: [
-            97.05654907226486, 49.163686913320525, -206.9676341563623,
-            113.51998246227959, 42.45171682621987, -307.9664735094599,
-            107.49730354358402, 32.15467193547202, -1357.808834758404,
-            94.56013180548646, 33.13695036109706, 4180.970800785241,
-          ],
-        },
-        // 贴地模式，这里设置为贴地
-        classificationType: client.ClassificationType.BOTH,
-        // 面的填充模式，设置为纯色填充
-        fillType: client.FillType.solid,
-        // 设置填充颜色
-        material: 'yellow',
+    const id = await client.scene.primitiveLayers.layerAddPrimitive(RegionLayer, {
+      hierarchy: {
+        //面的点串，按顺序分别为 [经度，纬度，高度，经度，纬度，高度，... ]
+        positions: [
+          104.09041239594507, 30.522565980817113, 451.6263685815248,
+          104.09039102991115, 30.52191151632133, 451.57037520826725,
+          104.09126063326975, 30.521911503777226, 451.9677855978646,
+          104.0912553009503, 30.522581351706652, 452.0128354292317,
+        ],
       },
     });
-    setRegion({
+    id && setRegion({
       entityId: id,
       layerName: RegionLayer,
-      type: client.FillType.solid,
+      type: client.PrimitiveType.SolidRegion,
     })
   }
 
@@ -222,57 +314,137 @@ export default function LayerStyle(props: Props) {
   const changeSize = (size: number) => {
     if (!selectData) return
     const client = Web3dUtils.getClient()
-    if (!client) return
+    if (!client || !region) return
     switch (selectData.layerName) {
-      case PointLayer:
+      case ImageLayer:
         if (selectData.entityId === img?.entityId) {
           // 修改图片大小
-          client.scene.updateEntityModify(selectData.layerName, {
-            id: selectData.entityId,
-            billboard: {
-              width: size,
-              height: size,
-            },
-          });
-        } else if (selectData.entityId === point?.entityId) {
+          styleRef.current = {
+            ...(styleRef.current as any),
+            height: size,
+            width: size,
+          }
+        }
+        break
+      case PointLayer:
+        if (selectData.entityId === point?.entityId) {
           // 修改点大小
-          client.scene.updateEntityModify(selectData.layerName, {
-            id: selectData.entityId,
-            point: {
-              size: size,
-            },
-          });
+          styleRef.current = {
+            ...(styleRef.current as any),
+            size: size,
+          }
         }
         break;
       case LineLayer:
         if (selectData.entityId === line?.entityId) {
-          // 修改线宽
-          client.scene.updateEntityModify(selectData.layerName, {
-            id: selectData.entityId,
-            polyline: {
-              lineType: line.type!,
-              width: size,
-            },
-          });
+          styleRef.current = {
+            ...(styleRef.current as any),
+            width: size,
+          }
         }
         break;
       case RegionLayer:
         if (selectData.entityId === region?.entityId) {
           // 修改面边框宽度
-          client.scene.updateEntityModify(selectData.layerName, {
-            id: selectData.entityId,
-            polygon: {
-              fillType: region.type!,
-              outlineWidth: size,
-              outline: true,
-              outlineColor: 'red',
-            },
-          });
+          styleRef.current = {
+            ...(styleRef.current as any),
+            outlineWidth: size,
+            outlineColor: 'red',
+          }
         }
         break;
       default:
         break;
     }
+    styleRef.current && client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current)
+  }
+
+  /**
+   * 获取线默认风格
+   * @param type 
+   * @returns 
+   */
+  const getDefaultLineStyle = (type: number) => {
+    const client = Web3dUtils.getClient()
+    if (!client) return styleRef.current
+
+    switch (type) {
+      case client.PrimitiveType.SolidLine:
+      // 实线默认风格
+      case client.PrimitiveType.ArrowLine:
+        // 箭头线默认风格
+        styleRef.current = {
+          type: type,
+          classificationType: client.ClassificationType.BOTH,
+          color: (styleRef.current as any)?.color || 'rgba(0, 100, 255, 1)',
+          width: (styleRef.current as any)?.width || 2,
+        }
+        break
+      case client.PrimitiveType.DashedLine:
+        // 虚线默认风格
+        styleRef.current = {
+          type: type,
+          classificationType: client.ClassificationType.BOTH,
+          color: (styleRef.current as any)?.color || 'rgba(0, 100, 255, 1)',
+          width: (styleRef.current as any)?.width || 2,
+        }
+        break
+      case client.PrimitiveType.ContourLine:
+        // 轮廓线默认风格
+        styleRef.current = {
+          type: type,
+          classificationType: client.ClassificationType.BOTH,
+          /** 内部颜色outlineInnerColor */
+          color: (styleRef.current as any)?.color || 'rgba(0, 100, 255, 1)',
+          /** 轮廓宽outlineOuterWidth */
+          width: (styleRef.current as any)?.width || 2,
+          /** 轮廓宽outlineOuterWidth */
+          outlineWidth: 4,
+          /** 轮廓颜色outlineOuterColor */
+          outlineColor: 'rgba(255, 127, 0, 1)',
+        }
+        break
+    }
+    return styleRef.current
+  }
+
+  /**
+   * 获取面默认风格
+   * @param type 
+   * @returns 
+   */
+  const getDefaultRegionStyle = (type: number) => {
+    const client = Web3dUtils.getClient()
+    if (!client) return styleRef.current
+    switch (type) {
+      case client.PrimitiveType.SolidRegion:
+        // 纯色面默认风格
+        styleRef.current = {
+          type: client.PrimitiveType.SolidRegion,
+          classificationType: client.ClassificationType.BOTH,
+          color: (styleRef.current as any)?.color || 'rgba(0, 100, 255, 0.5)',
+        }
+        break
+      case client.PrimitiveType.GridRegion:
+        // 网格面默认风格
+        styleRef.current = {
+          type: client.PrimitiveType.GridRegion,
+          classificationType: client.ClassificationType.BOTH,
+          color: (styleRef.current as any)?.color || 'rgba(0, 100, 255, 0.5)',
+        }
+        break
+      case client.PrimitiveType.StripeRegion:
+        // 条纹面默认风格
+        styleRef.current = {
+          type: client.PrimitiveType.StripeRegion,
+          classificationType: client.ClassificationType.BOTH,
+          evenColor: (styleRef.current as any)?.evenColor || 'rgba(0, 100, 255, 0.5)',
+          oddColor: 'rgba(255, 127, 0, 1)',
+          repeat: 10,
+        }
+        break
+    }
+    return styleRef.current
   }
 
   /**
@@ -284,102 +456,73 @@ export default function LayerStyle(props: Props) {
     return (
       <TouchableOpacity
         style={[styles.colorBtn, { backgroundColor: color }]}
-        onPress={() => {
+        onPress={async () => {
           if (!selectData) return
           const client = Web3dUtils.getClient()
-          if (!client) return
+          if (!client || selectData.type === undefined || !styleRef.current) return
           switch (selectData.layerName) {
             case PointLayer:
-              if (selectData.entityId === img?.entityId) {
-                client.scene.updateEntityModify(selectData.layerName, {
-                  id: selectData.entityId,
-                  billboard: {
-                    image: color,
-                  },
-                });
-              } else if (selectData.entityId === point?.entityId) {
-                client.scene.updateEntityModify(selectData.layerName, {
-                  id: selectData.entityId,
-                  point: {
-                    color: color,
-                  },
-                });
+              if (selectData.entityId === point?.entityId) {
+                styleRef.current = {
+                  ...(styleRef.current as PrimitiveSolidPoint),
+                  color: color,
+                }
+                client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current);
               }
               break;
             case LineLayer:
               if (selectData.entityId === line?.entityId) {
-                let polyline = undefined
-                if (line?.type === client.LineType.solid || line?.type === client.LineType.arrow) {
-                  polyline = {
-                    lineType: line.type,
-                    material: color,
+                if (line?.type === client.PrimitiveType.SolidLine || line?.type === client.PrimitiveType.ArrowLine) {
+                  styleRef.current = {
+                    ...(styleRef.current as any),
+                    type: line.type,
+                    color: color,
                   }
-                } else if (line?.type === client.LineType.dashed) {
-                  polyline = {
-                    lineType: client.LineType.dashed,
-                    material: {
-                      /** 前景色 */
-                      color: color,
-                      /** 背景色 */
-                      // gapColor?: string | PropertyAnimation<string>;
-                      /** 间隔 */
-                      // dashLength?: number;
-                    },
+                } else if (line?.type === client.PrimitiveType.DashedLine) {
+                  styleRef.current = {
+                    ...(styleRef.current as any),
+                    type: client.PrimitiveType.DashedLine,
+                    color: color,
                   }
-                } else if (line?.type === client.LineType.contour) {
-                  polyline = {
-                    lineType: client.LineType.contour,
-                    material: {
-                      /** 内部颜色outlineInnerColor */
-                      color: color,
-                      /** 轮廓宽outlineOuterWidth */
-                      outlineWidth: 4,
-                      /** 轮廓颜色outlineOuterColor */
-                      outlineColor: 'rgba(255, 127, 0, 1)',
-                    }
+                } else if (line?.type === client.PrimitiveType.ContourLine) {
+                  styleRef.current = {
+                    ...(styleRef.current as any),
+                    type: client.PrimitiveType.ContourLine,
+                    /** 内部颜色outlineInnerColor */
+                    color: color,
+                    /** 轮廓宽outlineOuterWidth */
+                    outlineWidth: 4,
+                    /** 轮廓颜色outlineOuterColor */
+                    outlineColor: 'rgba(255, 127, 0, 1)',
                   }
                 }
-                polyline && client.scene.updateEntityModify(selectData.layerName, {
-                  id: selectData.entityId,
-                  polyline: polyline as any,
-                });
+                styleRef.current && await client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current);
               }
               break;
             case RegionLayer:
               if (selectData.entityId === region?.entityId) {
-                let polygon = undefined
-                if (region?.type === client.FillType.solid) {
-                  polygon = {
-                    fillType: client.FillType.solid,
-                    material: color,
+                if (region?.type === client.PrimitiveType.SolidRegion) {
+                  styleRef.current = {
+                    ...(styleRef.current as any),
+                    type: client.PrimitiveType.SolidRegion,
+                    color: color,
                   }
-                } else if (region?.type === client.FillType.gridding) {
-                  polygon = {
-                    fillType: client.FillType.gridding,
-                    material: {
-                      color: color,
-                      // cellAlpha?: number;
-                      // lineCount?: number;
-                      // lineThickness?: number;
-                      // lineOffset?: number;
-                    },
+                } else if (region?.type === client.PrimitiveType.GridRegion) {
+                  styleRef.current = {
+                    ...(styleRef.current as any),
+                    type: client.PrimitiveType.GridRegion,
+                    color: color,
                   }
-                } else if (region?.type === client.FillType.stripe) {
-                  polygon = {
-                    fillType: client.FillType.stripe,
-                    material: {
-                      evenColor: color,
-                      oddColor: 'rgba(255, 127, 0, 1)',
-                      repeat: 10,
-                      // offset: number;
-                      // orientationHorizontal: boolean;
-                    }
+                } else if (region?.type === client.PrimitiveType.StripeRegion) {
+                  styleRef.current = {
+                    ...(styleRef.current as any),
+                    type: client.PrimitiveType.StripeRegion,
+                    evenColor: color,
+                    oddColor: 'rgba(255, 127, 0, 1)',
+                    repeat: 10,
                   }
                 }
-                polygon && client.scene.updateEntityModify(selectData.layerName, {
-                  id: selectData.entityId,
-                  polygon: polygon as any,
-                });
+                styleRef.current && (await client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current));
               }
               break;
             default:
@@ -403,12 +546,11 @@ export default function LayerStyle(props: Props) {
           if (!selectData) return
           const client = Web3dUtils.getClient()
           if (!client) return
-          client.scene.updateEntityModify(selectData.layerName, {
-            id: selectData.entityId,
-            billboard: {
-              image: image,
-            },
-          });
+          styleRef.current = {
+            ...(styleRef.current as PrimitiveBillboard),
+            image: image,
+          }
+          client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current)
         }}
       >
         <Image source={{ uri: image }} style={{ width: 30, height: 30 }} />
@@ -422,45 +564,37 @@ export default function LayerStyle(props: Props) {
    * @param type 
    * @returns 
    */
-  const renderTypeBtn = (image: ImageRequireSource, type: LineType | FillType) => {
+  const renderTypeBtn = (image: ImageRequireSource, type: number) => {
     return (
       <TouchableOpacity
         style={styles.imgBtn}
-        onPress={() => {
+        onPress={async () => {
           if (!selectData) return
           const client = Web3dUtils.getClient()
           if (!client) return
           if (selectData && selectData.entityId === line?.entityId) {
-            client.scene.updateEntityModify(selectData.layerName, {
-              id: selectData.entityId,
-              polyline: {
-                lineType: type as LineType,
-              },
-            });
+            styleRef.current = getDefaultLineStyle(type)
+            styleRef.current && (await client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current));
 
             setLine(data => {
               if (data) {
                 return {
                   ...data,
-                  type: type as LineType,
+                  type: type,
                 }
               }
               return data
             })
 
           } else if (selectData && selectData.entityId === region?.entityId) {
-            client.scene.updateEntityModify(selectData.layerName, {
-              id: selectData.entityId,
-              polygon: {
-                fillType: type as FillType,
-              },
-            });
+            styleRef.current = getDefaultRegionStyle(type)
+            styleRef.current && (await client.scene.primitiveLayers.setLayerPrimitiveUniform(selectData.layerName, styleRef.current));
 
             setRegion(data => {
               if (data) {
                 return {
                   ...data,
-                  type: type as FillType,
+                  type: type,
                 }
               }
               return data
@@ -485,10 +619,10 @@ export default function LayerStyle(props: Props) {
         <View style={styles.rowView}>
           <Text style={styles.rowTitle}>类型</Text>
           <View style={styles.rowContent}>
-            {renderTypeBtn(icon_line_solid, client.LineType.solid)}
-            {renderTypeBtn(icon_line_dashed, client.LineType.dashed)}
-            {renderTypeBtn(icon_line_contour, client.LineType.contour)}
-            {renderTypeBtn(icon_line_arrow, client.LineType.arrow)}
+            {renderTypeBtn(icon_line_solid, client.PrimitiveType.SolidLine)}
+            {renderTypeBtn(icon_line_dashed, client.PrimitiveType.DashedLine)}
+            {renderTypeBtn(icon_line_contour, client.PrimitiveType.ContourLine)}
+            {renderTypeBtn(icon_line_arrow, client.PrimitiveType.ArrowLine)}
           </View>
         </View>
       )
@@ -497,9 +631,9 @@ export default function LayerStyle(props: Props) {
         <View style={styles.rowView}>
           <Text style={styles.rowTitle}>类型</Text>
           <View style={styles.rowContent}>
-            {renderTypeBtn(icon_region_solid, client.FillType.solid)}
-            {renderTypeBtn(icon_region_grid, client.FillType.gridding)}
-            {renderTypeBtn(icon_region_stripe, client.FillType.stripe)}
+            {renderTypeBtn(icon_region_solid, client.PrimitiveType.SolidRegion)}
+            {renderTypeBtn(icon_region_grid, client.PrimitiveType.GridRegion)}
+            {renderTypeBtn(icon_region_stripe, client.PrimitiveType.StripeRegion)}
           </View>
         </View>
       )
@@ -545,17 +679,20 @@ export default function LayerStyle(props: Props) {
             </View>
           }
 
-          <View style={styles.rowView}>
-            <Text style={styles.rowTitle}>大小</Text>
-            <TextInput
-              style={styles.input}
-              placeholderTextColor={'#000000ff'}
-              keyboardType='numeric'
-              onChangeText={(text) => {
-                changeSize(Number(text))
-              }}
-            />
-          </View>
+          {
+            selectData.entityId !== region?.entityId &&
+            <View style={styles.rowView}>
+              <Text style={styles.rowTitle}>{selectData.entityId === line?.entityId ? '宽度' : '大小'}</Text>
+              <TextInput
+                style={styles.input}
+                placeholderTextColor={'#000000ff'}
+                keyboardType='numeric'
+                onChangeText={(text) => {
+                  changeSize(Number(text))
+                }}
+              />
+            </View>
+          }
         </View>
       </KeyboardAvoidingView>
     )
@@ -587,28 +724,28 @@ export default function LayerStyle(props: Props) {
           <TouchableOpacity
             style={[styles.methodBtn, { backgroundColor: selectData?.entityId !== undefined && selectData?.entityId === img?.entityId ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setSelectData(data => data?.entityId !== undefined && data?.entityId === img?.entityId ? undefined : img)}
+            onPress={() => onChangeMethod(img)}
           >
             <Image source={icon_pic} style={styles.methodBtnImg} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.methodBtn, { backgroundColor: selectData?.entityId !== undefined && selectData?.entityId === point?.entityId ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setSelectData(data => data?.entityId !== undefined && data?.entityId === point?.entityId ? undefined : point)}
+            onPress={() => onChangeMethod(point)}
           >
             <Image source={icon_point_black} style={styles.methodBtnImg} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.methodBtn, { backgroundColor: selectData?.entityId !== undefined && selectData?.entityId === line?.entityId ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setSelectData(data => data?.entityId !== undefined && data?.entityId === line?.entityId ? undefined : line)}
+            onPress={() => onChangeMethod(line)}
           >
             <Image source={icon_line_black} style={[styles.methodBtnImg, { width: 24, height: 24 }]} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.methodBtn, { backgroundColor: selectData?.entityId !== undefined && selectData?.entityId === region?.entityId ? '#4680DF' : '#fff' }]}
             activeOpacity={0.8}
-            onPress={() => setSelectData(data => data?.entityId !== undefined && data?.entityId === region?.entityId ? undefined : region)}
+            onPress={() => onChangeMethod(region)}
           >
             <Image source={icon_region_black} style={styles.methodBtnImg} />
           </TouchableOpacity>
