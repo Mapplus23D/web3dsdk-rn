@@ -36,6 +36,8 @@ const icon_hand_point = require('./icon_hand_point.png')
 const icon_close = require('./icon_close.png')
 const icon_doc = require('./icon_doc.png')
 const icon_save = require('./icon_save.png')
+const icon_add = require('./icon_add.png')
+const icon_delete = require('./icon_delete.png')
 
 export {
   icon_aim_point,
@@ -76,6 +78,8 @@ export {
   icon_close,
   icon_doc,
   icon_save,
+  icon_add,
+  icon_delete,
 
 }
 

@@ -22,10 +22,10 @@ const DemoList = ({ navigation }: Props) => {
             title: '底图数据',
             path: 'BaseMap',
           },
-          {
-            title: '地图样式',
-            path: 'MapStyle',
-          },
+          // {
+          //   title: '地图样式',
+          //   path: 'MapStyle',
+          // },
           {
             title: '地图定位',
             path: 'MapLocation',
@@ -54,6 +54,10 @@ const DemoList = ({ navigation }: Props) => {
           {
             title: '对象编辑',
             path: 'ObjectEdit',
+          },
+          {
+            title: '对象属性',
+            path: 'ObjectAttribute',
           },
           {
             title: '保存打开',
