@@ -55,6 +55,10 @@ const DemoList = ({ navigation }: Props) => {
             title: '对象编辑',
             path: 'ObjectEdit',
           },
+          {
+            title: '保存打开',
+            path: 'MapOpenSave',
+          },
         ],
       },
     ];

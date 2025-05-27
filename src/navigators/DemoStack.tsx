@@ -7,6 +7,7 @@ import DrawText from '../demos/2_mapObject/2_2_DrawText';
 import DataImport from '../demos/2_mapObject/2_3_DataImport';
 import LayerStyle from '../demos/2_mapObject/2_4_LayerStyle';
 import ObjectEdit from '../demos/2_mapObject/2_5_ObjectEdit';
+import MapOpenSave from '../demos/2_mapObject/2_7_MapOpenSave';
 import DemoList from '../demos/DemoList';
 import Home from '../pages/Home';
 import { DemoStackParamList } from './types';
@@ -29,6 +30,7 @@ export default function DemoStack() {
       <Stack.Screen name="DataImport" component={DataImport} />
       <Stack.Screen name="LayerStyle" component={LayerStyle} />
       <Stack.Screen name="ObjectEdit" component={ObjectEdit} />
+      <Stack.Screen name="MapOpenSave" component={MapOpenSave} />
     </Stack.Navigator>
   );
 }

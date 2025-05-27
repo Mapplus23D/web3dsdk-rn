@@ -15,6 +15,7 @@ export type DemoStackParamList = {
   DataImport: undefined;
   LayerStyle: undefined;
   ObjectEdit: undefined;
+  MapOpenSave: undefined;
 };
 
 export type DemoStackNavigationProps<

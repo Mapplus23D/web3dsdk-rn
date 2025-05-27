@@ -34,6 +34,8 @@ const icon_aim = require('./icon_aim.png')
 const icon_hand_point_disabled = require('./icon_hand_point_disabled.png')
 const icon_hand_point = require('./icon_hand_point.png')
 const icon_close = require('./icon_close.png')
+const icon_doc = require('./icon_doc.png')
+const icon_save = require('./icon_save.png')
 
 export {
   icon_aim_point,
@@ -72,6 +74,8 @@ export {
   icon_hand_point_disabled,
   icon_hand_point,
   icon_close,
+  icon_doc,
+  icon_save,
 
 }
 
