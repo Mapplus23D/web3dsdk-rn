@@ -1,14 +1,12 @@
 /**
  * 几何图形绘制Demo
  */
-import { Client, IMap3D } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, View } from 'react-native';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LicenseUtil } from '../../utils';
+import { Client, ILicenseInfo, IMap3D, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'DrawObject'> { }
 

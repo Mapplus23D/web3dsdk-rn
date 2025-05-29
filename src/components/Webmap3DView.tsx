@@ -1,9 +1,8 @@
-import { Client } from "client/webmap3d-client"
+import { Client, createSuperMap3D } from "@mapplus/react-native-webmap3d"
 import React, { useEffect, useMemo, useRef } from "react"
 import { Image, TouchableOpacity, View } from "react-native"
 import WebView from "react-native-webview"
 import { DemoStackNavigationProps, DemoStackParamList } from 'src/navigators/types'
-import createSuperMap3D from "../../client/react-native"
 import { icon_back } from '../assets'
 
 interface Props {
@@ -77,6 +76,7 @@ export default function Webmap3DView(props: Props) {
       }}>
       <WebView
         ref={webViewRef}
+        ignoreSilentHardwareSwitch={true}
         onMessage={e => {
           // 处理来自 webview 中 webmap3d sdk 发来的消息
           client.handleMessage(e.nativeEvent.data)

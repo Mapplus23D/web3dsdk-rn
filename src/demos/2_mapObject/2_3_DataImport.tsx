@@ -1,14 +1,12 @@
 import { Buffer } from 'buffer';
-import { Client } from 'client/webmap3d-client';
 import { useEffect, useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { icon_import } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
 import NativeHTools from '../../specs/v1/NativeHTools';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
+import { Client, ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'DataImport'> { }
 

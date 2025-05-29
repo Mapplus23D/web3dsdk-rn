@@ -15,6 +15,7 @@ add_subdirectory("${RNOH_CPP_DIR}" ./rn)
 add_subdirectory("${OH_MODULE_DIR}/@react-native-oh-tpl/react-native-safe-area-context/src/main/cpp" ./safe-area)
 add_subdirectory("${OH_MODULE_DIR}/@react-native-oh-tpl/geolocation/src/main/cpp" ./geolocation)
 add_subdirectory("${OH_MODULE_DIR}/@react-native-ohos/react-native-fs/src/main/cpp" ./fs)
+add_subdirectory("${OH_MODULE_DIR}/@mapplus/react-native-webmap3d/src/main/cpp" ./webmap3d)
 
 file(GLOB GENERATED_CPP_FILES "./generated/*.cpp")
 
@@ -28,3 +29,4 @@ target_link_libraries(rnoh_app PUBLIC rnoh)
 target_link_libraries(rnoh_app PUBLIC rnoh_safe_area)
 target_link_libraries(rnoh_app PUBLIC rnoh_geolocation)
 target_link_libraries(rnoh_app PUBLIC rnoh_fs)
+target_link_libraries(rnoh_app PUBLIC rnoh_webmap3d)

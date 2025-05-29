@@ -1,14 +1,12 @@
 /**
  * 图层风格Demo
  */
-import { Client, PrimitiveBillboard, PrimitiveSolidPoint, PrimitiveUniform } from 'client/webmap3d-client';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Client, ILicenseInfo, PrimitiveBillboard, PrimitiveSolidPoint, PrimitiveUniform, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 import { Image, ImageRequireSource, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { icon_line_arrow, icon_line_black, icon_line_contour, icon_line_dashed, icon_line_solid, icon_pic, icon_point_black, icon_region_black, icon_region_grid, icon_region_solid, icon_region_stripe } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'LayerStyle'> { }

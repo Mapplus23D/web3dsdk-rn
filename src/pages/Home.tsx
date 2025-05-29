@@ -1,27 +1,22 @@
-import { useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
-import { DemoStackPageProps } from "src/navigators/types";
-import { ILicenseInfo } from "src/specs/v1/NativeWebMap3D";
-import { RTNWebMap3D } from "../specs";
+import { ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
+import { useEffect, useState } from 'react';
+import { Button, Text, View } from 'react-native';
+import { DemoStackPageProps } from 'src/navigators/types';
 
-interface Props extends DemoStackPageProps<'DemoHome'> {
-
-}
+interface Props extends DemoStackPageProps<'DemoHome'> { }
 
 export default function Home({ navigation }: Props) {
-
-  const [license, setLicense] = useState<ILicenseInfo | undefined>()
+  const [license, setLicense] = useState<ILicenseInfo | undefined>();
 
   useEffect(() => {
-    init()
-    getLicense()
-  }, [])
-
+    init();
+    getLicense();
+  }, []);
 
   /** 原生端进行初始化 */
   function init() {
     // 原生端通过指定端口号启动服务，并复制需要使用的资源
-    RTNWebMap3D?.initEnvironment(9999)
+    RTNWebMap3D?.initEnvironment(9999);
   }
 
   /**
@@ -31,9 +26,9 @@ export default function Home({ navigation }: Props) {
     // 获取当前许可状态
     RTNWebMap3D?.getLicenseInfo().then(res => {
       if (res) {
-        setLicense(res)
+        setLicense(res);
       }
-    })
+    });
   }
 
   /** 激活sdk */
@@ -62,9 +57,8 @@ export default function Home({ navigation }: Props) {
         <Text>{`生效时间：${getTimeString(license.start)}`}</Text>
         <Text>{`过期时间：${getTimeString(license.end)}`}</Text>
       </View>
-    )
-  }
-
+    );
+  };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -73,10 +67,13 @@ export default function Home({ navigation }: Props) {
         <Button title="获取激活状态" onPress={getLicense} />
       </View>
       <View style={{ marginTop: 20 }}>
-        <Button title="地图操作示例" onPress={() => navigation.navigate('DemoList')} />
+        <Button
+          title="地图操作示例"
+          onPress={() => navigation.navigate('DemoList')}
+        />
       </View>
     </View>
-  )
+  );
 }
 
 

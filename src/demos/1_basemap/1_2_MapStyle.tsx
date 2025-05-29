@@ -4,9 +4,8 @@
 import { useEffect, useState } from 'react';
 import Webmap3DView from "../../components/Webmap3DView";
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LicenseUtil, Web3dUtils } from '../../utils';
+import { ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'MapStyle'> { }
 

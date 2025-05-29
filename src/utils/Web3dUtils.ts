@@ -1,4 +1,4 @@
-import { Client } from 'client/webmap3d-client';
+import { Client } from '@mapplus/react-native-webmap3d';
 
 let client: Client | null = null;
 

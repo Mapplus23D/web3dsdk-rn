@@ -2,15 +2,13 @@
  * 文本绘制Demo
  */
 import Geolocation from '@react-native-oh-tpl/geolocation';
-import { Client, Primitive } from 'client/webmap3d-client';
+import { Client, RTNWebMap3D, ILicenseInfo, Primitive } from '@mapplus/react-native-webmap3d';
 import { useEffect, useRef, useState } from 'react';
 import { Image, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { icon_aim_point, icon_label, icon_label_terlabel } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { EntityStyle } from '../../constValues';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawText'> { }

@@ -6,8 +6,8 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "webmap3d": "file:./libs/webmap3d.har",
     "@rnoh/react-native-openharmony": "0.72.67",
+    "@mapplus/react-native-webmap3d": "file:../../node_modules/@mapplus/react-native-webmap3d/harmony/rn_webmap3d.har",
     "@react-native-oh-tpl/react-native-webview": "file:../../node_modules/@react-native-oh-tpl/react-native-webview/harmony/rn_webview.har",
     "@react-native-oh-tpl/react-native-safe-area-context": "file:../../node_modules/@react-native-oh-tpl/react-native-safe-area-context/harmony/safe_area.har",
     "@react-native-oh-tpl/geolocation": "file:../../node_modules/@react-native-oh-tpl/geolocation/harmony/geolocation.har",

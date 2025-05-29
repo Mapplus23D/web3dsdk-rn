@@ -1,15 +1,13 @@
 /**
  * 图层风格Demo
  */
-import { Client } from 'client/webmap3d-client';
+import { Client, RTNWebMap3D, ILicenseInfo } from '@mapplus/react-native-webmap3d';
 import { useEffect, useMemo, useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { icon_close, icon_doc, icon_save } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
 import NativeHTools from '../../specs/v1/NativeHTools';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'MapOpenSave'> { }

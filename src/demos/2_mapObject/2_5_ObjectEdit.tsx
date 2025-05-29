@@ -1,14 +1,12 @@
 /**
  * 图层风格Demo
  */
-import { Client, PolygonHierarchy, Primitive, PrimitiveSolidLine, Vector2, Vector3 } from 'client/webmap3d-client';
+import { Client, PolygonHierarchy, Primitive, PrimitiveSolidLine, Vector2, Vector3, RTNWebMap3D, ILicenseInfo } from '@mapplus/react-native-webmap3d';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ImageRequireSource, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { icon_aim, icon_aim_disabled, icon_aim_point, icon_close, icon_editor, icon_hand_point, icon_hand_point_disabled, icon_node_add, icon_node_delete, icon_node_move, icon_node_select, icon_submit_black } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'ObjectEdit'> { }

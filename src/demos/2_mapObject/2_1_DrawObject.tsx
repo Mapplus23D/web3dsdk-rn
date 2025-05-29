@@ -1,14 +1,12 @@
 /**
  * 几何图形绘制Demo
  */
-import { Circle, Client, Primitive, Vector3 } from 'client/webmap3d-client';
+import { Circle, Client, ILicenseInfo, Primitive, RTNWebMap3D, Vector3 } from '@mapplus/react-native-webmap3d';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { icon_aim_point, icon_circle_region, icon_line_black, icon_line_curve_black, icon_line_dashed, icon_pic, icon_point_black, icon_region_black } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'DrawObject'> { }

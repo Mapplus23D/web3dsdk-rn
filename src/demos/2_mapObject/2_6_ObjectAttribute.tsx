@@ -1,14 +1,12 @@
 /**
  * 图层风格Demo
  */
-import { Client, Primitive } from 'client/webmap3d-client';
+import { Client, Primitive, RTNWebMap3D, ILicenseInfo } from '@mapplus/react-native-webmap3d';
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, ImageRequireSource, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { icon_add, icon_close, icon_delete, icon_submit_black } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
 
 interface Props extends DemoStackPageProps<'ObjectAttribute'> { }

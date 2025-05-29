@@ -2,15 +2,13 @@
  * 定位 Demo
  */
 import Geolocation from '@react-native-oh-tpl/geolocation';
-import { Client } from 'client/webmap3d-client';
 import { useEffect, useState } from 'react';
 import { Image, TouchableOpacity } from 'react-native';
 import { icon_location } from '../../assets';
 import Webmap3DView from "../../components/Webmap3DView";
 import { DemoStackPageProps } from '../../navigators/types';
-import { RTNWebMap3D } from '../../specs';
-import { ILicenseInfo } from '../../specs/v1/NativeWebMap3D';
 import { LicenseUtil, Web3dUtils } from '../../utils';
+import { Client, ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'MapLocation'> { }
 

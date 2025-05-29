@@ -1,4 +1,4 @@
-import { RTNWebMap3D } from '../specs'
+import {RTNWebMap3D} from '@mapplus/react-native-webmap3d'
 
 export const active = async (code?: string) => {
   let license = await RTNWebMap3D?.getLicenseInfo()
