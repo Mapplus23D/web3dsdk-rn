@@ -1,12 +1,11 @@
-import { Buffer } from 'buffer';
+import { Client, ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 import { useEffect, useState } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { icon_import } from '../../assets';
 import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
 import NativeHTools from '../../specs/v1/NativeHTools';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
-import { Client, ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'DataImport'> { }
 
@@ -131,26 +130,27 @@ export default function DataImport(props: Props) {
   /**
    * 打开文件管理器，选择文件
    */
-  const openDict = async () => {
+  const openDict = async (type: 'kml' | 'shp') => {
     NativeHTools?.openDoc({
       // fileSuffixFilters: ['文档|.shp,xlsx,txt,kml'],
-      fileSuffixFilters: ['文档|kml'],
+      fileSuffixFilters: ['文档|' + (type === 'kml' ? 'kml' : 'shp,dbf,prj,shx')],
       // 默认文件路径
       defaultFilePathUri: 'file://docs/storage/Users/currentUser/test',
     }).then(async (files) => {
-      console.log('openDoc', files);
       const client = Web3dUtils.getClient()
       if (!client) return
 
       let result = false
-      for (const file of files) {
-        if (file.endsWith('.kml')) {
+      if (type === 'kml') {
+        for (const file of files) {
+          console.log('openDoc kml-', type, files);
           result = await importKml(file)
-          console.log('添加', file, result);
-        } else if (file.endsWith('.shp')) {
-          result = await importShp(file)
-          console.log('添加', file, result);
+          console.log('导入KML', file, result);
         }
+      } else {
+        console.log('openDoc shp-', type, files);
+        result = await importShp(files)
+        console.log('导入SHP', files, result);
       }
     })
   }
@@ -164,12 +164,10 @@ export default function DataImport(props: Props) {
     let result = false
     const client = Web3dUtils.getClient()
     if (!client) return result
-    const _content = await NativeHTools?.readFile(file)
-    if (!_content) return result
+    const content = await NativeHTools?.readFile(file)
+    if (!content) return result
     const fileName = file.split('/').pop()
     if (!fileName) return result
-
-    const content = Buffer.from(_content, 'base64').toString()
 
     /** 导入到点图层 */
     result = await client.scene.primitiveLayers.addPrimitivesFromKml(
@@ -196,45 +194,50 @@ export default function DataImport(props: Props) {
    * @param file 
    * @returns 
    */
-  const importShp = async (file: string) => {
+  const importShp = async (files: string[]) => {
     let result = false
     const client = Web3dUtils.getClient()
     if (!client) return result
-    const content = await NativeHTools?.readFile(file)
-    if (!content) return result
-    const fileName = file.split('/').pop()
-    if (!fileName) return result
+    const contents: {
+      type: "base64";
+      fileName: string;
+      base64: string;
+    }[] = []
+    // 读取shp相关文件的base64内容，放到数组中
+    for (const file of files) {
+      const fileName = file.substring(file.lastIndexOf('/') + 1)
+      const content = await NativeHTools?.readFile(file, 'base64')
 
-    // FileUtils.copyExternalFile(file, `${RNFS.DocumentDirectoryPath + '/' + fileName}`).then((res) => {
-    //   console.log('copyExternalFile', res);
-    // })
-    // const _file = DataUtils.base64ToFile(content, fileName)
-    // console.log('base64ToFile', _file);
+      content && contents.push({
+        type: "base64",
+        fileName: fileName,
+        base64: content,
+      })
+    }
 
-    // const f = await DataUtils.vectorFile2Geojson([_file])
+    // 解析文件base64内容，转为geojson格式数据
+    const f = await client.fileConverter.shp2Geojson(contents)
 
-    // for (const element of f) {
-    //   result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
-    //     DEFAULT_POINT_LAYER,
-    //     element,
-    //   )
-    //   console.log('addPrimitivesFromGeojson', result);
-    // }
+    // 添加geojson数据到图层中
+    for (const element of f) {
+      // 一份数据中可能会有点，线，面
+      // 添加到图层时，会根据图层类型，把对应数据添加到图层中
+      // 若当前图层和数据类型不一致，则不会添加到图层中
+      result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
+        DEFAULT_POINT_LAYER,
+        element,
+      )
 
-    // result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
-    //   DEFAULT_POINT_LAYER,
-    //   content,
-    // )
+      result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
+        DEFAULT_LINE_LAYER,
+        element,
+      )
 
-    // result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
-    //   DEFAULT_LINE_LAYER,
-    //   content,
-    // )
-
-    // result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
-    //   DEFAULT_REGION_LAYER,
-    //   content,
-    // )
+      result = await client.scene.primitiveLayers.addPrimitivesFromGeojson(
+        DEFAULT_REGION_LAYER,
+        element,
+      )
+    }
     return result
   }
 
@@ -262,9 +265,18 @@ export default function DataImport(props: Props) {
           <TouchableOpacity
             style={styles.methodBtn}
             activeOpacity={0.8}
-            onPress={openDict}
+            onPress={() => openDict('kml')}
           >
             <Image source={icon_import} style={styles.methodBtnImg} />
+            <Text style={styles.methodBtnTxt}>KML</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.methodBtn}
+            activeOpacity={0.8}
+            onPress={() => openDict('shp')}
+          >
+            <Image source={icon_import} style={styles.methodBtnImg} />
+            <Text style={styles.methodBtnTxt}>SHP</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -289,7 +301,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 40,
+    height: 60,
     width: 40,
     borderRadius: 4,
     backgroundColor: '#fff',
@@ -298,5 +310,9 @@ const styles = StyleSheet.create({
   methodBtnImg: {
     height: 24,
     width: 24,
-  }
+  },
+  methodBtnTxt: {
+    fontSize: 10,
+    marginTop: 4,
+  },
 });

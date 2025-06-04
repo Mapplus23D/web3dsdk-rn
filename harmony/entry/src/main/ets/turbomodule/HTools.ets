@@ -116,7 +116,6 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
   async readFile(path: string, encoding?: string): Promise<string> {
     return new Promise(resolve => {
       try {
-        // let helper = new util.Base64Helper()
         let file = fs.openSync(path, fs.OpenMode.READ_ONLY);
         let bufferSize = 1024;
         let arrayBuffer = new ArrayBuffer(bufferSize);
@@ -128,20 +127,20 @@ export class HTools extends TurboModule implements TM.RTNHTools.Spec {
 
         let option = new Option();
         let content: string = "";
+        let allBuffer = buffer.concat([]);
         let readLen: number = 0;
         do {
           // 读取文件内容到数组缓冲区
           readLen = fs.readSync(file.fd, arrayBuffer, option);
           if (readLen > 0) {
-            // let buffArr = new Uint8Array(arrayBuffer)
-            // content += helper.encodeToStringSync(buffArr)
             const buf = buffer.from(arrayBuffer, 0, readLen);
-            content += buf.toString(encoding || 'utf8');
+            allBuffer = buffer.concat([allBuffer, buf])
             // 更新下一次读取的偏移量，继续从文件后续位置读取
             option.offset += readLen;
           }
         } while (readLen === bufferSize);
         fs.close(file);
+        content = allBuffer.toString(encoding || 'utf8')
         resolve(content);
       } catch (e) {
         resolve('');
