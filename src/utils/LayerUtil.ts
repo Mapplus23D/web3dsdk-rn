@@ -240,7 +240,7 @@ export async function addTerrainLayer(name: string) {
       })
       if (s3mLayer && s3mLayer?.length > 0) {
         s3mLayer.forEach((item) => {
-          client.scene.setTilesLayerBottomAltitude(item.name, 0)
+          client.scene.setS3MTilesLayerBottomAltitude(item.name, 0)
         })
       }
       break

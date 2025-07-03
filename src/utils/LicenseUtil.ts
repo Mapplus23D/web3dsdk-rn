@@ -6,9 +6,14 @@ export const active = async (code?: string) => {
     // 激活序列号，替换为有效的序列号
     const serial = code || 'JNGPN-DN2RX-UZCQT-EXUB3-X9UHT'
     const result = await RTNWebMap3D?.activate(serial)
-    if (result) {
+    if (result.success) {
       license = await RTNWebMap3D?.getLicenseInfo()
+    } else {
+      console.warn(result.message)
     }
+  }
+  if(!license?.isValid) {
+    console.warn(license ? license.message : '没有获取到许可')
   }
   return license
 }
