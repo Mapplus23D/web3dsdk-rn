@@ -1,5 +1,6 @@
-import { SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { DemoStackPageProps, DemoStackParamList } from 'src/navigators/types';
+import { icon_back_black } from '../assets';
 
 interface DemoItem {
   title: string;
@@ -83,14 +84,31 @@ const DemoList = ({ navigation }: Props) => {
     </View>
   );
 
+  const renderHeader = () => {
+    return (
+      <View style={styles.headerView}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <Image style={styles.backImg} source={icon_back_black} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>SDK示例</Text>
+      </View>
+    )
+  }
+
   return (
-    <SectionList
-      sections={DATA}
-      keyExtractor={(item, index) => item.title + index}
-      renderItem={renderItem}
-      renderSectionHeader={renderSectionHeader}
-      contentContainerStyle={styles.container}
-    />
+    <View>
+      {renderHeader()}
+      <SectionList
+        sections={DATA}
+        keyExtractor={(item, index) => item.title + index}
+        renderItem={renderItem}
+        renderSectionHeader={renderSectionHeader}
+        contentContainerStyle={styles.container}
+      />
+    </View>
   );
 };
 
@@ -117,6 +135,31 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 14,
+  },
+  headerView: {
+    backgroundColor: '#fff',
+    height: 60,
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+  },
+  backBtn: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 40,
+    width: 40,
+  },
+  backImg: {
+    height: 24,
+    width: 24,
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    textAlign: 'center',
+    marginRight: 50,
   },
 });
 

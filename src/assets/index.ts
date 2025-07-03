@@ -1,4 +1,5 @@
 const icon_back = require('./icon_back.png')
+const icon_back_black = require('./icon_back_black.png')
 const icon_location = require('./icon_location.png')
 const icon_aim_point = require('./icon_aim_point.png')
 
@@ -42,6 +43,7 @@ const icon_delete = require('./icon_delete.png')
 export {
   icon_aim_point,
   icon_back,
+  icon_back_black,
   icon_location,
 
   icon_line_black,
