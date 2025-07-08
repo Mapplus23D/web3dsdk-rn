@@ -6,6 +6,7 @@ import Webmap3DView from '../../components/Webmap3DView';
 import { DemoStackPageProps } from '../../navigators/types';
 import NativeHTools from '../../specs/v1/NativeHTools';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
+import RNFS from '@react-native-ohos/react-native-fs';
 
 interface Props extends DemoStackPageProps<'DataImport'> { }
 
@@ -164,7 +165,10 @@ export default function DataImport(props: Props) {
     let result = false
     const client = Web3dUtils.getClient()
     if (!client) return result
-    const content = await NativeHTools?.readFile(file)
+    const _path = decodeURI( file.split('file://docs')[1] )
+    console.log('_path', _path)
+    const content = await RNFS.readFile( _path)
+    // const content = await NativeHTools?.readFile(file)
     if (!content) return result
     const fileName = file.split('/').pop()
     if (!fileName) return result
@@ -204,9 +208,15 @@ export default function DataImport(props: Props) {
       base64: string;
     }[] = []
     // 读取shp相关文件的base64内容，放到数组中
+    console.log('读取文件----')
     for (const file of files) {
       const fileName = file.substring(file.lastIndexOf('/') + 1)
-      const content = await NativeHTools?.readFile(file, 'base64')
+      const _path = decodeURI( file.split('file://docs')[1] )
+      console.log('_path', _path)
+      const content = await RNFS.readFile( _path, 'base64')
+      // console.log('file', r)
+      // const content = btoa(r);
+      // const content = await NativeHTools?.readFile(file, 'base64')
 
       content && contents.push({
         type: "base64",
@@ -216,8 +226,10 @@ export default function DataImport(props: Props) {
     }
 
     // 解析文件base64内容，转为geojson格式数据
+    console.log('转换shp----')
     const f = await client.fileConverter.shp2Geojson(contents)
 
+    console.log('添加----')
     // 添加geojson数据到图层中
     for (const element of f) {
       // 一份数据中可能会有点，线，面
