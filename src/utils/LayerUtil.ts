@@ -20,7 +20,7 @@ export const BaseLayers = {
   TIAN_MAP: '天地图',
   TIAN_VEC: '天地图矢量',
   TIAN_TER: '天地图地形晕渲',
-  BING_MAP: 'BingMap',
+  // BING_MAP: 'BingMap',
   GEOVIS_IMG: '星图地球',
   SIWEIEARTH: '四维地球',
   GEOVIS_TER: '星图地球地形渲染图',
@@ -54,8 +54,8 @@ export async function addImageLayer(name: string) {
     for (let index = 0; index < layer.length; index++) {
       const data = layer[index];
       if (data.name !== name && (
-        data.name === BaseLayers.BING_MAP
-        || data.name === BaseLayers.GEOVIS_TER
+        // data.name === BaseLayers.BING_MAP
+        data.name === BaseLayers.GEOVIS_TER
         || data.name === BaseLayers.GEOVIS_IMG
         || data.name === BaseLayers.SIWEIEARTH
         || data.name === BaseLayers.GEOVIS_VEC
@@ -104,17 +104,17 @@ export async function addImageLayer(name: string) {
         maximumLevel: 13,
       })
       break
-    case BaseLayers.BING_MAP:
-      client.scene.addImagelayer(BaseLayers.BING_MAP, {
-        type: client.ProviderType.BING,
-        /** 服务 url */
-        url: 'https://dev.virtualearth.net',
-        /** bing 地图服务类型 */
-        mapStyle: client.BingMapsStyle.AERIAL,
-        /** bing 地图服务访问 key */
-        key: 'AtPtWBbxwoSMbcSNcICiUFaQg345fZfN7N6ZE_7UNHna1T84Q81myLQDCIfKIAMU',
-      })
-      break
+    // case BaseLayers.BING_MAP:
+    //   client.scene.addImagelayer(BaseLayers.BING_MAP, {
+    //     type: client.ProviderType.BING,
+    //     /** 服务 url */
+    //     url: 'https://dev.virtualearth.net',
+    //     /** bing 地图服务类型 */
+    //     mapStyle: client.BingMapsStyle.AERIAL,
+    //     /** bing 地图服务访问 key */
+    //     key: 'AtPtWBbxwoSMbcSNcICiUFaQg345fZfN7N6ZE_7UNHna1T84Q81myLQDCIfKIAMU',
+    //   })
+    //   break
     case BaseLayers.GEOVIS_IMG:
       client.scene.addImagelayer(name, {
         type: client.ProviderType.SUPERMAP,
