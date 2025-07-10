@@ -193,6 +193,39 @@ export default function DataImport(props: Props) {
     return result
   }
 
+  const importKmlUri = async () => {
+    let result = false
+    const client = Web3dUtils.getClient()
+    if (!client) return result
+    
+    const files = await RTNWebMap3D.pickFileUri()
+    console.log('files', files)
+    if(files.length === 0) {
+      return false
+    }
+
+    const fileUri = files[0].uri
+
+    /** 导入到点图层 */
+    result = await client.scene.primitiveLayers.addPrimitivesFromKmlURI(
+      DEFAULT_POINT_LAYER,
+      fileUri,
+    )
+
+    /** 导入到线图层 */
+    result = await client.scene.primitiveLayers.addPrimitivesFromKmlURI(
+      DEFAULT_LINE_LAYER,
+      fileUri,
+    )
+
+    /** 导入到面图层 */
+    result = await client.scene.primitiveLayers.addPrimitivesFromKmlURI(
+      DEFAULT_REGION_LAYER,
+      fileUri,
+    )
+    return result
+  }
+
   /**
    * 导入shp文件
    * @param file 
@@ -281,6 +314,14 @@ export default function DataImport(props: Props) {
           >
             <Image source={icon_import} style={styles.methodBtnImg} />
             <Text style={styles.methodBtnTxt}>KML</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.methodBtn}
+            activeOpacity={0.8}
+            onPress={importKmlUri}
+          >
+            <Image source={icon_import} style={styles.methodBtnImg} />
+            <Text style={styles.methodBtnTxt}>  KML  大文件</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.methodBtn}
