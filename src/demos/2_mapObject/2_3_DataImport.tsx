@@ -16,7 +16,6 @@ const DEFAULT_REGION_LAYER = 'default_region_layer'
 
 export default function DataImport(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   /** 激活许可 */
   const initLicense = () => {
@@ -111,16 +110,6 @@ export default function DataImport(props: Props) {
       Web3dUtils.setClient(null)
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 2. 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   const _onLoad = (client: Client) => {
     // 3. 场景加载后，初始化图层
@@ -336,11 +325,10 @@ export default function DataImport(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={_onLoad}
       navigation={props.navigation}
     >

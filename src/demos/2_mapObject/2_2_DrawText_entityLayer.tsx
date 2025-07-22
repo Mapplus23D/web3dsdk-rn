@@ -9,7 +9,7 @@ import Webmap3DView from '../../components/Webmap3DView';
 import { EntityStyle } from '../../constValues';
 import { DemoStackPageProps } from '../../navigators/types';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
-import { Client, Entity, ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
+import { Client, Entity, ILicenseInfo } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'DrawText'> { }
 
@@ -17,7 +17,6 @@ const DEFAULT_LAYER = 'default_layer'
 
 export default function DrawText(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   /** 文本 */
   const textRef = useRef('')
@@ -62,16 +61,6 @@ export default function DrawText(props: Props) {
       Web3dUtils.setClient(null)
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   const _onLoad = (client: Client) => {
     console.log('inited');
@@ -194,11 +183,10 @@ export default function DrawText(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={_onLoad}
       navigation={props.navigation}
     >

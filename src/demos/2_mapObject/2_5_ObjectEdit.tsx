@@ -22,7 +22,6 @@ interface SelectData { primitiveId: string, layerName: string, type?: number }
 
 export default function ObjectEdit(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   const [editMethod, setEditMethod] = useState<EditMethod>('aim');
   const [isEdit, setIsEdit] = useState(false);
@@ -54,11 +53,6 @@ export default function ObjectEdit(props: Props) {
       setLicense(res)
     })
   }
-
-  const resourceBase = useMemo(() => {
-    const base = RTNWebMap3D?.getResourceBase()
-    return base || ''
-  }, [])
 
   useEffect(() => {
     // 选中对象后，开始编辑
@@ -106,7 +100,7 @@ export default function ObjectEdit(props: Props) {
       return await client.scene.primitiveLayers.addPrimitiveLayer(ImageLayer, {
         type: client.PrimitiveType.Billboard,
         /** 大小pixelSize */
-        image: `${resourceBase}/resource/symbol/image/ATM.png`,
+        image: 'appresource://symbol/image/ATM.png',
         /** 遮挡深度 */
         disableDepthTestDistance: 10000000000,
         /** 图片高，单位px */
@@ -156,7 +150,8 @@ export default function ObjectEdit(props: Props) {
     if (!client) return;
 
     // 若需要使用资源包中的资源，则需要设置资源路径
-    client.scene.setResourceBase(resourceBase)
+    const resourceBase = RTNWebMap3D.getResourceBase()
+    client.scene.setAppResourceBase(resourceBase)
 
     // 默认添加底图
     LayerUtil.addImageLayer(LayerUtil.BaseLayers.TIAN_MAP)
@@ -197,16 +192,6 @@ export default function ObjectEdit(props: Props) {
       Web3dUtils.setClient(null)
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   /**
    * 切换编辑方式
@@ -954,11 +939,10 @@ export default function ObjectEdit(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={onLoad}
       navigation={props.navigation}
     >

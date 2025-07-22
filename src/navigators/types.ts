@@ -17,6 +17,9 @@ export type DemoStackParamList = {
   ObjectEdit: undefined;
   ObjectAttribute: undefined;
   MapOpenSave: undefined;
+
+  LocalMap: undefined
+  LocalResource: undefined
 };
 
 export type DemoStackNavigationProps<

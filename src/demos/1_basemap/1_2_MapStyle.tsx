@@ -5,14 +5,13 @@ import { useEffect, useState } from 'react';
 import Webmap3DView from "../../components/Webmap3DView";
 import { DemoStackPageProps } from '../../navigators/types';
 import { LicenseUtil, Web3dUtils } from '../../utils';
-import { ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
+import { ILicenseInfo } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'MapStyle'> { }
 
 export default function MapStyle(props: Props) {
 
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   /** 激活许可 */
   const initLicense = () => {
@@ -27,13 +26,6 @@ export default function MapStyle(props: Props) {
   }, [])
 
   useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
     return () => {
       // 退出页面，关闭场景
       Web3dUtils.getClient()?.scene.close()
@@ -41,11 +33,10 @@ export default function MapStyle(props: Props) {
     }
   }, [license])
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={client => {
         console.log('inited');
         Web3dUtils.setClient(client);

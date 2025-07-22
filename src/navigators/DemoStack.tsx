@@ -12,6 +12,8 @@ import MapOpenSave from '../demos/2_mapObject/2_7_MapOpenSave';
 import DemoList from '../demos/DemoList';
 import Home from '../pages/Home';
 import { DemoStackParamList } from './types';
+import LocalMap from '../demos/3_localMap/3_1_LocalMap';
+import LocalResource from '../demos/3_localMap/3_2_LocalResource';
 
 const Stack = createStackNavigator<DemoStackParamList>();
 
@@ -33,6 +35,8 @@ export default function DemoStack() {
       <Stack.Screen name="ObjectEdit" component={ObjectEdit} />
       <Stack.Screen name="ObjectAttribute" component={ObjectAttribute} />
       <Stack.Screen name="MapOpenSave" component={MapOpenSave} />
+      <Stack.Screen name="LocalMap" component={LocalMap} />
+      <Stack.Screen name="LocalResource" component={LocalResource} />
     </Stack.Navigator>
   );
 }

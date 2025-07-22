@@ -1,35 +1,16 @@
-import { Client, createSuperMap3D } from "@mapplus/react-native-webmap3d"
-import React, { useEffect, useMemo, useRef } from "react"
+import { Client, WebMap3DView } from "@mapplus/react-native-webmap3d"
+import React from "react"
 import { Image, TouchableOpacity, View } from "react-native"
-import WebView from "react-native-webview"
 import { DemoStackNavigationProps, DemoStackParamList } from 'src/navigators/types'
 import { icon_back } from '../assets'
 
 interface Props {
-  clientUrl: string
   onInited: (client: Client) => void
   children?: React.ReactNode | React.ReactNode[]
   navigation?: DemoStackNavigationProps<keyof DemoStackParamList>
 }
 
 export default function Webmap3DView(props: Props) {
-  const webViewRef = useRef<WebView>(null)
-
-  // 调用 createSuperMap3D 创建一个 react-native 端专用的 client 对象
-  // client 对象负责与 webview 中的 webmap3d sdk 进行通信
-  const client = useMemo(() => {
-    const client = createSuperMap3D(() => {
-      // 返回 webview 引用以便进行消息的发送
-      return webViewRef.current
-    })
-    return client
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      client.scene?.close()
-    }
-  }, [])
 
   const renderBackBtn = () => {
     if (!props.navigation) {
@@ -74,22 +55,11 @@ export default function Webmap3DView(props: Props) {
         width: '100%',
         height: '100%',
       }}>
-      <WebView
-        ref={webViewRef}
-        ignoreSilentHardwareSwitch={true}
-        onMessage={e => {
-          // 处理来自 webview 中 webmap3d sdk 发来的消息
-          client.handleMessage(e.nativeEvent.data)
+      <WebMap3DView 
+        onInited={c => {
+          props.onInited(c)
         }}
-        onLoadEnd={() => {
-          // 加载完成后，初始化 client 对象，与 webview 中的 webmap3d sdk 建立联系
-          // 初始化完成后才可以调用 sdk 中的各个方法
-          client.init(undefined, {clientPort: 9999}).then(() => {
-            props.onInited(client)
-          })
-        }}
-        // 本地的web服务地址，包含实际的 sdk 代码引用
-        source={{ uri: props.clientUrl }}
+        debug
       />
       {renderBackBtn()}
       {props.children}

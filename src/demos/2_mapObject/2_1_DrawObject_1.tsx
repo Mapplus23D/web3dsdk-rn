@@ -19,13 +19,6 @@ export default function DrawObject(props: Props) {
 
   const saveMapRef = useRef<IMap3D | undefined>()
 
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
-
-  const resourceBase = useMemo(() => {
-    const base = RTNWebMap3D?.getResourceBase()
-    return base || ''
-  }, [])
-
   /** 激活许可 */
   const initLicense = () => {
     LicenseUtil.active().then(res => {
@@ -39,13 +32,6 @@ export default function DrawObject(props: Props) {
   }, [])
 
   useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
     return () => {
       // 退出页面，关闭场景
       client?.scene.close()
@@ -78,7 +64,8 @@ export default function DrawObject(props: Props) {
     client.scene.setRequestRenderMode(true);
 
     // 若需要使用资源包中的资源，则需要设置资源路径
-    client.scene.setResourceBase(resourceBase)
+    const resourceBase = RTNWebMap3D.getResourceBase()
+    client.scene.setAppResourceBase(resourceBase)
 
     //对于地图初始化可以通过 `client.scene.open` 直接打开配置好的地图参数进行
     //或者手动调用相关方法进行
@@ -303,7 +290,7 @@ export default function DrawObject(props: Props) {
         z: 1000, // 高度
       },
       billboard: {
-        image: `${resourceBase}/resource/symbol/image/ATM.png`,
+        image: 'appresource://symbol/image/ATM.png',
       }
     });
 
@@ -454,12 +441,9 @@ export default function DrawObject(props: Props) {
     }
   }
 
-  if (!clientUrl) return
-
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Webmap3DView
-        clientUrl={clientUrl}
         onInited={client => {
           console.log('inited');
           setClient(client);

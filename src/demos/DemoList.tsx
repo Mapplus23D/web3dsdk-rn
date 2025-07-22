@@ -66,6 +66,19 @@ const DemoList = ({ navigation }: Props) => {
           },
         ],
       },
+      {
+        title: '本地地图',
+        data: [
+          {
+            title: '地图管理',
+            path: 'LocalMap',
+          },
+          {
+            title: '资源管理',
+            path: 'LocalResource',
+          },
+        ],
+      },
     ];
 
   const handlePress = (item: DemoItem) => {

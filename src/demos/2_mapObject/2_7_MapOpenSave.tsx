@@ -23,7 +23,6 @@ interface SelectData { primitiveId: string, layerName: string, type?: number }
 
 export default function MapOpenSave(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   /** 激活许可 */
   const initLicense = () => {
@@ -31,11 +30,6 @@ export default function MapOpenSave(props: Props) {
       setLicense(res)
     })
   }
-
-  const resourceBase = useMemo(() => {
-    const base = RTNWebMap3D?.getResourceBase()
-    return base || ''
-  }, [])
 
   const onLoad = (client: Client) => {
     Web3dUtils.setClient(client);
@@ -75,7 +69,7 @@ export default function MapOpenSave(props: Props) {
       return await client.scene.primitiveLayers.addPrimitiveLayer(ImageLayer, {
         type: client.PrimitiveType.Billboard,
         /** 大小pixelSize */
-        image: `${resourceBase}/resource/symbol/image/ATM.png`,
+        image: 'appresource://symbol/image/ATM.png',
         /** 遮挡深度 */
         disableDepthTestDistance: 10000000000,
         /** 图片高，单位px */
@@ -125,7 +119,8 @@ export default function MapOpenSave(props: Props) {
     if (!client) return;
 
     // 若需要使用资源包中的资源，则需要设置资源路径
-    client.scene.setResourceBase(resourceBase)
+    const resourceBase = RTNWebMap3D.getResourceBase()
+    client.scene.setAppResourceBase(resourceBase)
 
     // 默认添加底图
     LayerUtil.addImageLayer(LayerUtil.BaseLayers.TIAN_MAP)
@@ -164,16 +159,6 @@ export default function MapOpenSave(props: Props) {
       Web3dUtils.setClient(null)
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   /**
    * 添加点
@@ -349,11 +334,10 @@ export default function MapOpenSave(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={onLoad}
       navigation={props.navigation}
     >

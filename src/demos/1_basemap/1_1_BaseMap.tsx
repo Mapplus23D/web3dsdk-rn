@@ -6,7 +6,7 @@ import { Animated, SectionList, SectionListData, SectionListRenderItemInfo, Text
 import Webmap3DView from "../../components/Webmap3DView";
 import { DemoStackPageProps } from '../../navigators/types';
 import { LayerUtil, LicenseUtil, Web3dUtils } from '../../utils';
-import { ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
+import { ILicenseInfo } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'BaseMap'> { }
 interface Section {
@@ -17,7 +17,6 @@ interface Section {
 export default function BaseMap(props: Props) {
 
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
   const [panelVisible, setPanelVisible] = useState(false)
   const [layerData, setLayerData] = useState<Section[]>([])
 
@@ -75,11 +74,6 @@ export default function BaseMap(props: Props) {
   useEffect(() => {
     // 激活sdk后，初始化
     if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
       initData()
     }
     return () => {
@@ -138,11 +132,10 @@ export default function BaseMap(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={client => {
         console.log('inited');
         Web3dUtils.setClient(client);

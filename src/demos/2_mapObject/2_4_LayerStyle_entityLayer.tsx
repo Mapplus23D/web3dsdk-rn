@@ -19,7 +19,6 @@ interface SelectData { entityId: string, layerName: string, type?: number }
 
 export default function LayerStyle(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   const [selectData, setSelectData] = useState<SelectData>();
 
@@ -47,7 +46,8 @@ export default function LayerStyle(props: Props) {
     if (!client) return;
 
     // 若需要使用资源包中的资源，则需要设置资源路径
-    client.scene.setResourceBase(resourceBase)
+    const resourceBase = RTNWebMap3D.getResourceBase()
+    client.scene.setAppResourceBase(resourceBase)
 
     // 默认添加底图
     LayerUtil.addImageLayer(LayerUtil.BaseLayers.TIAN_MAP)
@@ -78,16 +78,6 @@ export default function LayerStyle(props: Props) {
       Web3dUtils.setClient(null)
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   const _onLoad = (client: Client) => {
     Web3dUtils.setClient(client);
@@ -132,7 +122,7 @@ export default function LayerStyle(props: Props) {
       },
       point: undefined,
       billboard: {
-        image: `${resourceBase}/resource/symbol/image/ATM.png`,
+        image: 'appresource://symbol/image/ATM.png',
         verticalOrigin: client.VerticalOrigin.baseline,
         width: 20,
         height: 20,
@@ -393,7 +383,7 @@ export default function LayerStyle(props: Props) {
    * @param image 
    * @returns 
    */
-  const renderImageBtn = (image: string) => {
+  const renderImageBtn = (props: {uri: string, imageUri: string}) => {
     return (
       <TouchableOpacity
         style={styles.imgBtn}
@@ -404,12 +394,12 @@ export default function LayerStyle(props: Props) {
           client.scene.updateEntityModify(selectData.layerName, {
             id: selectData.entityId,
             billboard: {
-              image: image,
+              image: props.uri,
             },
           });
         }}
       >
-        <Image source={{ uri: image }} style={{ width: 30, height: 30 }} />
+        <Image source={{ uri: props.imageUri }} style={{ width: 30, height: 30 }} />
       </TouchableOpacity>
     )
   }
@@ -534,11 +524,11 @@ export default function LayerStyle(props: Props) {
             <View style={styles.rowView}>
               <Text style={styles.rowTitle}>图片</Text>
               <View style={styles.rowContent}>
-                {renderImageBtn(`${resourceBase}/resource/symbol/image/ATM.png`)}
-                {renderImageBtn(`${resourceBase}/resource/symbol/image/起点.png`)}
-                {renderImageBtn(`${resourceBase}/resource/symbol/image/终点.png`)}
-                {renderImageBtn(`${resourceBase}/resource/symbol/image/超市.png`)}
-                {renderImageBtn(`${resourceBase}/resource/symbol/image/地铁.png`)}
+                {renderImageBtn({uri: `appresource://symbol/image/ATM.png`, imageUri: `${resourceBase}/symbol/image/ATM.png`})}
+                {renderImageBtn({uri: `appresource://symbol/image/起点.png`, imageUri: `${resourceBase}/symbol/image/起点.png`})}
+                {renderImageBtn({uri: `appresource://symbol/image/终点.png`, imageUri: `${resourceBase}/symbol/image/终点.png`})}
+                {renderImageBtn({uri: `appresource://symbol/image/超市.png`, imageUri: `${resourceBase}/symbol/image/超市.png`})}
+                {renderImageBtn({uri: `appresource://symbol/image/地铁.png`, imageUri: `${resourceBase}/symbol/image/地铁.png`})}
               </View>
             </View>
           }
@@ -615,11 +605,10 @@ export default function LayerStyle(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={_onLoad}
       navigation={props.navigation}
     >

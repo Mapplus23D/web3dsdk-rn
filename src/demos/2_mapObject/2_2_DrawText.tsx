@@ -2,7 +2,7 @@
  * 文本绘制Demo
  */
 import Geolocation from '@react-native-oh-tpl/geolocation';
-import { Client, RTNWebMap3D, ILicenseInfo, Primitive } from '@mapplus/react-native-webmap3d';
+import { Client, ILicenseInfo, Primitive } from '@mapplus/react-native-webmap3d';
 import { useEffect, useRef, useState } from 'react';
 import { Image, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { icon_aim_point, icon_label, icon_label_terlabel } from '../../assets';
@@ -23,7 +23,6 @@ enum DrawType {
 
 export default function DrawText(props: Props) {
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   const [drawType, setDrawType] = useState<DrawType>(DrawType.LABEL)
 
@@ -113,16 +112,6 @@ export default function DrawText(props: Props) {
       Web3dUtils.setClient(null)
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   const _onLoad = (client: Client) => {
     Web3dUtils.setClient(client);
@@ -303,11 +292,10 @@ export default function DrawText(props: Props) {
     )
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={_onLoad}
       navigation={props.navigation}
     >

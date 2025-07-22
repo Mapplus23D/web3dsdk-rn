@@ -8,14 +8,13 @@ import { icon_location } from '../../assets';
 import Webmap3DView from "../../components/Webmap3DView";
 import { DemoStackPageProps } from '../../navigators/types';
 import { LicenseUtil, Web3dUtils } from '../../utils';
-import { Client, ILicenseInfo, RTNWebMap3D } from '@mapplus/react-native-webmap3d';
+import { Client, ILicenseInfo } from '@mapplus/react-native-webmap3d';
 
 interface Props extends DemoStackPageProps<'MapLocation'> { }
 
 export default function MapLocation(props: Props) {
 
   const [license, setLicense] = useState<ILicenseInfo | undefined>()
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
 
   /** 激活许可 */
   const initLicense = () => {
@@ -30,13 +29,6 @@ export default function MapLocation(props: Props) {
   }, [])
 
   useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
 
     return () => {
       Web3dUtils.getClient()?.scene.close()
@@ -73,11 +65,10 @@ export default function MapLocation(props: Props) {
     })
   }
 
-  if (!license || !clientUrl) return
+  if (!license) return
 
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={_onLoad}
       navigation={props.navigation}
     >

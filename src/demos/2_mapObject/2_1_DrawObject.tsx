@@ -50,13 +50,6 @@ export default function DrawObject(props: Props) {
   const editPoints = useRef<Vector3[]>([])
   const history = useRef<{ layer: string, id: string }[]>([])
 
-  const [clientUrl, setClientUrl] = useState<string | undefined>()
-
-  const resourceBase = useMemo(() => {
-    const base = RTNWebMap3D?.getResourceBase()
-    return base || ''
-  }, [])
-
   /** 激活许可 */
   const initLicense = () => {
     LicenseUtil.active().then(res => {
@@ -72,16 +65,6 @@ export default function DrawObject(props: Props) {
       client?.scene.close()
     }
   }, [])
-
-  useEffect(() => {
-    if (license) {
-      // 获取 sdk web 服务地址
-      const res = RTNWebMap3D?.getClientUrl()
-      if (res) {
-        setClientUrl(res)
-      }
-    }
-  }, [license])
 
   useEffect(() => {
     init();
@@ -101,7 +84,8 @@ export default function DrawObject(props: Props) {
     client.scene.setRequestRenderMode(true);
 
     // 若需要使用资源包中的资源，则需要设置资源路径
-    client.scene.setResourceBase(resourceBase)
+    const resourceBase = RTNWebMap3D.getResourceBase()
+    client.scene.setAppResourceBase(resourceBase)
 
     // prepareInitMap()通过相机飞行，手动添加地形影像图层来达到相同效果
     prepareInitMap();
@@ -181,7 +165,7 @@ export default function DrawObject(props: Props) {
       return await client.scene.primitiveLayers.addPrimitiveLayer(ImageLayer, {
         type: client.PrimitiveType.Billboard,
         /** 大小pixelSize */
-        image: `${resourceBase}/resource/symbol/image/起点.png`,
+        image: 'appresource://symbol/image/起点.png',
         /** 遮挡深度 */
         disableDepthTestDistance: 10000000000,
         /** 图片高，单位px */
@@ -567,11 +551,8 @@ export default function DrawObject(props: Props) {
     )
   }
 
-  if (!clientUrl) return
-
   return (
     <Webmap3DView
-      clientUrl={clientUrl}
       onInited={client => {
         setClient(client);
         Web3dUtils.setClient(client)
